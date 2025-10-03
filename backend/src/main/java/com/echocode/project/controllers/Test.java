@@ -1,4 +1,4 @@
-package com.echocode.project.controller;
+package com.echocode.project.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
