@@ -11,5 +11,5 @@
 ### Integrantes:
 
 - Sebastian Gigirey
-- Phillips Bolwes
+- Phillip Bowles
 - Juan Andres Morena
