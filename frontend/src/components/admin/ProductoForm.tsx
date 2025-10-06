@@ -75,7 +75,7 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5 max-h-[500px] h-full overflow-auto px-6">
       <Select
         label="Tipo de Producto"
         options={tipoProductoOptions}

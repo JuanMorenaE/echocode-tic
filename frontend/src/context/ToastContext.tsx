@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { CheckCircleIcon, XCircleIcon, XIcon } from '@/components/icons';
+import { cn } from '@/lib/utils/cn';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -84,15 +85,15 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           return (
             <div
               key={toast.id}
-              className={`
-                ${style.bg}
-                text-white
-                rounded-lg shadow-2xl p-4 
-                flex items-start gap-3
-                pointer-events-auto
-                animate-slide-in
-                min-w-[300px]
-              `}
+              className={cn(
+                style.bg,
+                "text-white",
+                "rounded-lg shadow-2xl p-4",
+                "flex items-start gap-3",
+                "pointer-events-auto",
+                "animate-slide-in",
+                "min-w-[300px]",
+              )}
             >
               <div className="flex-shrink-0">
                 {style.icon}
