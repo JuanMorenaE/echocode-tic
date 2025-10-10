@@ -1,49 +1,85 @@
-CREATE DATABSE IF NOT EXISTS pizzumburgum;
+CREATE TABLE IF NOT EXISTS users (
+    userId serial primary key,
+    userHash varchar(36) not null,
+    email varchar(200) not null,
+    passwordHash varchar(32) not null,
+    firstName varchar(30) not null,
+    lastName varchar(30) not null,
+    phoneNumber varchar(20) not null
+);
 
-USE pizzumburgum;
 
 
-
-CREATE TABLE IF NOT EXISTS Clients (
-    clientId int auto_increment primary key,
-    clientHash varchar(36) not null,
+CREATE TABLE IF NOT EXISTS clients (
+    userId int primary key references users(userId),
     document varchar(20) not null,
-    email varchar(200) not null,
-    passwordHash varchar(32) not null,
-    firstName varchar(30) not null,
-    lastName varchar(30) not null,
-    phoneNumber varchar(20) not null,
-    birthdate date not null,
+    birthdate date not null
 );
 
 
 
-CREATE TABLE IF NOT EXISTS Administrators (
-    adminId int auto_increment primary key,
-    adminHash varchar(36) not null,
-    email varchar(200) not null,
-    passwordHash varchar(32) not null,
-    firstName varchar(30) not null,
-    lastName varchar(30) not null,
-    phoneNumber varchar(20) not null,
+CREATE TABLE IF NOT EXISTS administrators (
+    userId int primary key references users(userId)
 );
 
 
 
-CREATE TABLE IF NOT EXISTS Categories (
-    categoryId int auto_increment primary key,
-    categoryName varchar(20) not null,
+CREATE TABLE IF NOT EXISTS categories (
+    categoryId serial primary key,
+    categoryName varchar(20) not null
 );
 
 
 
-CREATE TABLE IF NOT EXISTS Ingredients (
-    ingredientId int auto_increment primary key,
+CREATE TABLE IF NOT EXISTS ingredients (
+    ingredientId serial primary key,
     ingredientName varchar(20) not null,
-    ingredientType bit not null,
-    category int not null,
-    cost float,
-    isEnable boolean not null,
+    ingredientType varchar(20) check (ingredientType in ('pizza', 'burger')),
+    category int references categories(categoryId),
+    price numeric(10,2) not null,
+    isEnabled boolean not null
+);
 
-    foreign key (category) references Categories(categoryId)
+
+
+CREATE TABLE IF NOT EXISTS sides (
+    sideId serial primary key,
+    sideName varchar(20) not null,
+    category int references categories(categoryId),
+    price numeric(10,2) not null,
+    isEnabled boolean not null
+);
+
+
+
+CREATE TABLE IF NOT EXISTS creations (
+    creationId serial primary key,
+    ownerId int references clients(userId),
+    isFavourite boolean not null,
+    creationType varchar(20) check (creationType in ('pizza', 'burger'))
+);
+
+
+
+CREATE TABLE IF NOT EXISTS creations_ingredients (
+    creationId int references creations(creationId),
+    ingredientId int references ingredients(ingredientId)
+);
+
+
+
+CREATE TABLE IF NOT EXISTS pizza_sizes (
+    sizeName varchar(20) primary key,
+    price numeric(10,2) not null
+);
+
+
+
+CREATE TABLE IF NOT EXISTS orders (
+    oderId serial primary key,
+    orderHash varchar(36) not null,
+    clientId int references clients(userId),
+    orderDate timestamp default now(),
+    orderStatus varchar(20) check (orderStatus in ('queued', 'preparing', 'on_the_way', 'delivered', 'cancelled')),
+    total numeric(10,2) not null
 );
