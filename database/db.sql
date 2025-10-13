@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS administrators (
 
 CREATE TABLE IF NOT EXISTS categories (
     categoryId serial primary key,
-    categoryName varchar(20) not null
+    categoryName varchar(20) unique not null
 );
 
 
@@ -56,14 +56,16 @@ CREATE TABLE IF NOT EXISTS creations (
     creationId serial primary key,
     ownerId int references clients(userId),
     isFavourite boolean not null,
-    creationType varchar(20) check (creationType in ('pizza', 'burger'))
+    creationType varchar(20) check (creationType in ('pizza', 'burger')),
+    size varchar(20) references pizza_sizes(sizeName)
 );
 
 
 
 CREATE TABLE IF NOT EXISTS creations_ingredients (
     creationId int references creations(creationId),
-    ingredientId int references ingredients(ingredientId)
+    ingredientId int references ingredients(ingredientId),
+    quantity
 );
 
 

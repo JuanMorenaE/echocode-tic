@@ -1,12 +1,13 @@
 package com.echocode.project.entities;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-@Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 public abstract class User {
     private long id;
     private String hash;

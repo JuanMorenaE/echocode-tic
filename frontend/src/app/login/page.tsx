@@ -19,7 +19,7 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <img 
-              src="/Logo-rojo.png" 
+              src="/Logo2.png" 
               alt="PizzUM & BurgUM" 
               className="h-16 mx-auto mb-2"
             />
