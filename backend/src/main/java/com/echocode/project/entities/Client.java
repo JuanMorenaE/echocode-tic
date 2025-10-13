@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class Client extends User {
     private String document;
-    private DocumentType documentType;
 
     private Date birthdate;
     private List<String> addresses;
@@ -23,7 +22,3 @@ public class Client extends User {
     }
 }
 
-enum DocumentType {
-    IDENTIFICATION_CARD,
-    PASSPORT,
-}
