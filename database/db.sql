@@ -78,10 +78,24 @@ CREATE TABLE IF NOT EXISTS pizza_sizes (
 
 
 CREATE TABLE IF NOT EXISTS orders (
-    oderId serial primary key,
+    orderId serial primary key,
     orderHash varchar(36) not null,
     clientId int references clients(userId),
     orderDate timestamp default now(),
     orderStatus varchar(20) check (orderStatus in ('queued', 'preparing', 'on_the_way', 'delivered', 'cancelled')),
     total numeric(10,2) not null
 );
+
+
+
+CREATE TABLE IF NOT EXISTS order_creations (
+    orderId serial primary key references orders(orderId),
+    creationId serial primary key references creations(creationId),
+)
+
+
+
+CREATE TABLE IF NOT EXISTS order_sides (
+    orderId serial primary key references orders(orderId),
+    sideId serial primary key references sides(sideId),
+)
