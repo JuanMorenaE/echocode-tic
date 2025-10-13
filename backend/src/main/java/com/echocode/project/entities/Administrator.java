@@ -1,12 +1,16 @@
 package com.echocode.project.entities;
 
+import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
+@SuperBuilder
+@Table(name = "administrators")
 public class Administrator extends User {
-    public Administrator(long id, String hash, String email, String password, String firstName, String lastName, String phoneNumber) {
-        super(id, hash, email, password, firstName, lastName, phoneNumber);
-    }
+    // Administrator no tiene campos adicionales por ahora
+    // Hereda todos los campos de User: id, hash, email, password, firstName, lastName, phoneNumber, cedula
 }

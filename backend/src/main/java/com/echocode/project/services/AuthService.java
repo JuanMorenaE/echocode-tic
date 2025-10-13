@@ -42,8 +42,7 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .document(request.getDocument())
-                .documentType(request.getDocumentType())
+                .cedula(request.getCedula())
                 .birthdate(request.getBirthdate())
                 .build();
 

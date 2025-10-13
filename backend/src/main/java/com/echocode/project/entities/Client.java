@@ -1,29 +1,28 @@
 package com.echocode.project.entities;
 
+import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 import java.util.List;
 
-@Builder
+@Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
+@Table(name = "clients")
 public class Client extends User {
-    private String document;
-    private DocumentType documentType;
-
+    @Temporal(TemporalType.DATE)
+    @Column(name = "birthdate")
     private Date birthdate;
+
+    @ElementCollection
+    @CollectionTable(name = "client_addresses", joinColumns = @JoinColumn(name = "client_id"))
+    @Column(name = "address")
     private List<String> addresses;
+
+    @OneToMany(mappedBy = "client")
     private List<Card> cards;
-
-    Client(long id, String hash, String email, String password, String firstName, String lastName, String phoneNumber) {
-        super(id, hash, email, password, firstName, lastName, phoneNumber);
-    }
-}
-
-enum DocumentType {
-    IDENTIFICATION_CARD,
-    PASSPORT,
 }

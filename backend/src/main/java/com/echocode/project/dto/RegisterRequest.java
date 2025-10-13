@@ -1,6 +1,5 @@
 package com.echocode.project.dto;
 
-import com.echocode.project.entities.DocumentType;
 import lombok.*;
 
 import java.util.Date;
@@ -15,7 +14,6 @@ public class RegisterRequest {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private String document;
-    private DocumentType documentType;
+    private String cedula;
     private Date birthdate;
 }
