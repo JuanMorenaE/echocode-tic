@@ -39,9 +39,19 @@ public class Order {
     private Date orderDate;
 
     @Column(name = "order_status")
-    private String orderStatus;
+    private Order_status orderStatus;
 
     @Column(name = "total")
     private double total;
+
+
+}
+
+enum Order_status {
+    QUEUED,
+    PREPARING,
+    ON_THE_WAY,
+    DELIVERED,
+    CANCELLED,
 }
 
