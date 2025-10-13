@@ -1,11 +1,13 @@
 package com.echocode.project.entities;
 
+import jakarta.persistence.Entity;
 import lombok.*;
 
 import java.util.Date;
 import java.util.List;
 
 @Builder
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
