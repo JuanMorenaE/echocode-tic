@@ -24,11 +24,21 @@ public class Creation {
     private boolean isFavourite;
 
     @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "creation_type")
     private CreationType creationType;
 
+    @ManyToOne
+    @JoinColumn(name = "pizza_size_id")
     private PizzaSize pizzaSize;
 
-    List<Ingredient> ingredients = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(
+        name = "creation_ingredients",
+        joinColumns = @JoinColumn(name = "creation_id"),
+        inverseJoinColumns = @JoinColumn(name = "ingredient_id")
+    )
+    private List<Ingredient> ingredients = new ArrayList<>();
 }
 
 enum CreationType {
