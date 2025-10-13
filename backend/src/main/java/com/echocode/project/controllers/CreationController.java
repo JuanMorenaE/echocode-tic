@@ -24,11 +24,7 @@ public class CreationController {
 
     @GetMapping("/{id}")
     public Creation getCreationByCreationId(@PathVariable int id){
-        try{
-            return creationService.getCreationById(id);
-        }catch (Exception ex){
-
-        }
+        return creationService.getCreationById(id);
     }
 
     @GetMapping("/client/{id}")
