@@ -3,12 +3,12 @@ package com.echocode.project.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Builder
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Table(name = "categories")
 public class Category {
     @Id
