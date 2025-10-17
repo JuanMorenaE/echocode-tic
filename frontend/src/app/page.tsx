@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -11,6 +11,19 @@ import { Producto, ProductCategory } from '@/types/producto.types';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('hamburguesas');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://localhost:8080/api/v1/categories');
+      if (!response.ok)
+        throw new Error("ERROR: " + response.status);
+
+      const result = await response.json();
+      console.log(result)
+    }
+
+    fetchData()
+  }, [])
 
   const categories: ProductCategory[] = ['hamburguesas', 'pizzas', 'acompañamientos', 'bebidas'];
 

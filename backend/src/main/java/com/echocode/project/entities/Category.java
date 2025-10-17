@@ -3,17 +3,14 @@ package com.echocode.project.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Builder
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "categories")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int categoryId;
+    private Long categoryId;
 
     @NonNull
     @Column(length = 20)

@@ -4,6 +4,7 @@ import com.echocode.project.entities.Category;
 import com.echocode.project.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -17,20 +18,18 @@ public class CategoryController {
     CategoryService categoryService;
 
     @GetMapping
-    public List<Category> GetCategories(){
-        return categoryService.getAllCategories();
+    public ResponseEntity<List<Category>> getAll(){
+        return ResponseEntity.ok(categoryService.getAll());
     }
 
     @GetMapping("/{id}")
-    public Category GetAllCategories(@PathVariable int id){
-        return categoryService.getCategoryById(id);
+    public ResponseEntity<Category> getById(@PathVariable long id){
+        return ResponseEntity.ok(categoryService.getById(id));
     }
 
     @PostMapping
-    public Category AddCategory(@RequestBody Category category){
-        if (categoryService.existsCategoryByName( category.getCategoryName()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Category already exists");
-
-        return categoryService.addCategory(category);
+    public ResponseEntity<Category> create(@RequestBody Category category){
+        Category newCategory = categoryService.create(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newCategory);
     }
 }
