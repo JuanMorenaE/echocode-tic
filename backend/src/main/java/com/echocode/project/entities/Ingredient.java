@@ -13,13 +13,13 @@ import lombok.*;
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ingredient_id")
+    @Column(name = "ingredientid")
     private int ingredientId;
 
-    @Column(name = "ingredient_name")
+    @Column(name = "ingredientname")
     private String ingredientName;
 
-    @Column(name = "ingredient_type")
+    @Column(name = "ingredienttype")
     private String ingredientType;
 
     @Column(name = "category")

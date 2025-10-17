@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { UserIcon, ShoppingCartIcon, MagnifyingGlassIcon } from '@/components/icons';
+import { UserIcon, ShoppingCartIcon, MagnifyingGlassIcon, PizzaIcon, HamburgerIcon } from '@/components/icons';
 
 export const Header = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,9 +44,21 @@ export const Header = () => {
 
         {/* Logo y tagline */}
         <div className="relative text-center px-5 py-8">
-          <p className="text-xl md:text-2xl opacity-95 mb-8">
-            ¡Las mejores pizzas y hamburguesas de la ciudad!
-          </p>
+          <strong className="text-xl md:text-3xl opacity-95 font-bold italic">
+            ¡Personalizalas tu mismo!
+          </strong>
+
+          <div className='flex justify-center items-center gap-10 flex-wrap py-8'>
+            <Link href={"creator?mode=pizza"} className='aspect-square max-w-[400px] w-full bg-white rounded-2xl flex flex-col justify-center items-center gap-10 hover:scale-105 transition-transform'>
+              <PizzaIcon size={140} className='text-red-500'/>
+              <h3 className='text-red-500 font-bold text-xl'>Crear Pizza</h3>
+            </Link>
+
+            <Link href={"creator?mode=burger"} className='aspect-square max-w-[400px] w-full bg-white rounded-2xl flex flex-col justify-center items-center gap-10 hover:scale-105 transition-transform'>
+              <HamburgerIcon size={140} className='text-red-500'/>
+              <h3 className='text-red-500 font-bold text-xl'>Crear Hamburguesa</h3>
+            </Link>
+          </div>
 
           {/* Barra de búsqueda */}
           <div className="max-w-2xl mx-auto relative">
