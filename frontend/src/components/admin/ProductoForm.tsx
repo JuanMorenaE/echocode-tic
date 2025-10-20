@@ -14,7 +14,7 @@ interface ProductoFormProps {
 
 export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps) => {
   const [formData, setFormData] = useState({
-    tipo: producto?.tipo || 'PIZZA',
+    tipo: producto?.tipo || 'ACOMPAÑAMIENTO',
     nombre: producto?.name || '',
     descripcion: producto?.description || '',
     precio: producto?.price || '',
@@ -24,8 +24,6 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
   const [isLoading, setIsLoading] = useState(false);
 
   const tipoProductoOptions = [
-    { value: 'PIZZA', label: 'Pizza' },
-    { value: 'HAMBURGUESA', label: 'Hamburguesa' },
     { value: 'ACOMPAÑAMIENTO', label: 'Acompañamiento' },
     { value: 'BEBIDA', label: 'Bebida' },
   ];

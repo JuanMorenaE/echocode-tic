@@ -4,6 +4,8 @@ import React from 'react';
 import {
   ShoppingCart,
   User,
+  UserCircle,
+  ShoppingBag,
   SignOut,
   Pizza,
   Hamburger,
@@ -65,6 +67,22 @@ export const UserIcon = ({
   weight = 'regular',
 }: IconProps) => {
   return <User size={size} className={className} weight={weight} />;
+};
+
+export const UserCircleIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <UserCircle size={size} className={className} weight={weight} />;
+};
+
+export const ShoppingBagIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <ShoppingBag size={size} className={className} weight={weight} />;
 };
 
 export const SignOutIcon = ({

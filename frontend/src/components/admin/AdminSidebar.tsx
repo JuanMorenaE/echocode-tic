@@ -10,7 +10,8 @@ import {
   UsersIcon,
   FileTextIcon,
   HouseIcon,
-  SignOutIcon
+  SignOutIcon,
+  StorefrontIcon
 } from '@/components/icons';
 
 const menuItems = [
@@ -23,6 +24,11 @@ const menuItems = [
     name: 'Productos',
     href: '/admin/productos',
     icon: PizzaIcon,
+  },
+  {
+    name: 'Ingredientes',
+    href: '/admin/ingredientes',
+    icon: StorefrontIcon,
   },
   {
     name: 'Pedidos',

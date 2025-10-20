@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
+import useAuth from '@/hooks/useAuth';
 import { UserIcon, LockIcon } from '@/components/icons';
 
 // Agregar LockIcon a los iconos si no existe
@@ -16,6 +17,7 @@ export const LoginForm = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -49,11 +51,10 @@ export const LoginForm = () => {
       // localStorage.setItem('token', response.token);
       
       // Simulación temporal
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Login:', formData);
+  await login({ email: formData.email, password: formData.password });
       router.push('/');
     } catch (error) {
-      setErrors({ submit: 'Error al iniciar sesión. Verifica tus credenciales.' });
+  setErrors({ submit: (error as Error).message || 'Error al iniciar sesión. Verifica tus credenciales.' });
     } finally {
       setIsLoading(false);
     }

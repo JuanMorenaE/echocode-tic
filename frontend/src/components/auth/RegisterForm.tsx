@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { UserIcon } from '@/components/icons';
+import useAuth from '@/hooks/useAuth';
 
 export const RegisterForm = () => {
   const router = useRouter();
@@ -19,6 +20,7 @@ export const RegisterForm = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const { register } = useAuth();
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -65,16 +67,16 @@ export const RegisterForm = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Conectar con el backend
-      // const response = await authApi.register(formData);
-      // localStorage.setItem('token', response.token);
-      
-      // Simulación temporal
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Register:', formData);
+      await register({
+        email: formData.email,
+        password: formData.password,
+        firstName: formData.nombre,
+        lastName: formData.apellido,
+        phoneNumber: formData.telefono,
+      });
       router.push('/');
     } catch (error) {
-      setErrors({ submit: 'Error al registrarse. Intenta nuevamente.' });
+      setErrors({ submit: (error as Error).message || 'Error al registrarse. Intenta nuevamente.' });
     } finally {
       setIsLoading(false);
     }

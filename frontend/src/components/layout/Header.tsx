@@ -3,9 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { UserIcon, ShoppingCartIcon, MagnifyingGlassIcon, PizzaIcon, HamburgerIcon } from '@/components/icons';
+import UserMenu from './UserMenu';
+import { CrearHamburguesaModal } from '@/components/creacion/CrearHamburguesaModal';
+import { CrearPizzaModal } from '@/components/creacion/CrearPizzaModal';
 
 export const Header = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isHamburguesaModalOpen, setIsHamburguesaModalOpen] = useState(false);
+  const [isPizzaModalOpen, setIsPizzaModalOpen] = useState(false);
 
   return (
     <header className="relative bg-gradient-to-br from-primary-600 to-primary-800 text-white overflow-hidden p-4">
@@ -28,12 +33,8 @@ export const Header = () => {
           </Link>
 
           {/* Iconos superiores */}
-          <div className="flex gap-3">
-            <Link href="/login">
-              <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
-                <UserIcon size={20} className="text-primary-600" />
-              </button>
-            </Link>
+          <div className="flex gap-3 items-center">
+            <UserMenu />
             <Link href="/carrito">
               <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
                 <ShoppingCartIcon size={20} className="text-primary-600" />
@@ -43,36 +44,56 @@ export const Header = () => {
         </div>
 
         {/* Logo y tagline */}
-        <div className="relative text-center px-5 py-8">
+        <div className="relative text-center px-5 py-8 z-20">
           <strong className="text-xl md:text-3xl opacity-95 font-bold italic">
             ¡Personalizalas tu mismo!
           </strong>
 
-          <div className='flex justify-center items-center gap-10 flex-wrap py-8'>
-            <Link href={"creator?mode=pizza"} className='aspect-square max-w-[400px] w-full bg-white rounded-2xl flex flex-col justify-center items-center gap-10 hover:scale-105 transition-transform'>
-              <PizzaIcon size={140} className='text-red-500'/>
-              <h3 className='text-red-500 font-bold text-xl'>Crear Pizza</h3>
-            </Link>
-
-            <Link href={"creator?mode=burger"} className='aspect-square max-w-[400px] w-full bg-white rounded-2xl flex flex-col justify-center items-center gap-10 hover:scale-105 transition-transform'>
-              <HamburgerIcon size={140} className='text-red-500'/>
-              <h3 className='text-red-500 font-bold text-xl'>Crear Hamburguesa</h3>
-            </Link>
-          </div>
-
-          {/* Barra de búsqueda */}
-          <div className="max-w-2xl mx-auto relative">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10">
-              <MagnifyingGlassIcon size={20} className="text-gray-400" />
+          {/* Cards Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto m-6">
+          {/* Crear Hamburguesa */}
+          <button
+            id="hamburguesa"
+            onClick={() => setIsHamburguesaModalOpen(true)}
+            className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-2 border-transparent hover:border-primary-500 relative"
+          >
+            <div className="flex flex-col items-center">
+              <div className="w-40 h-40 bg-gradient-to-br from-red-100 to-red-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <HamburgerIcon size={100} weight="fill" className="text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Crear Hamburguesa
+              </h2>
+              <p className="text-gray-600 text-center">
+                Elige tu pan, carne, vegetales y más
+              </p>
             </div>
-            <input
-              type="text"
-              placeholder="Buscar tu favorita..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-5 py-4 rounded-full text-gray-800 text-base shadow-lg outline-none"
-            />
-          </div>
+          </button>
+
+          {/* Crear Pizza */}
+          <button
+            id="pizza"
+            onClick={() => setIsPizzaModalOpen(true)}
+            className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 border-2 border-transparent hover:border-primary-500"
+          >
+            <div className="flex flex-col items-center">
+              <div className="w-40 h-40 bg-gradient-to-br from-red-100 to-red-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-105 transition-transform">
+                <PizzaIcon size={100} weight="fill" className="text-red-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Crear Pizza
+              </h2>
+              <p className="text-gray-600 text-center">
+                Elige tu masa, salsa, queso y toppings
+              </p>
+            </div>
+          </button>
+        </div>
+        
+        {/* Modales */}
+        <CrearHamburguesaModal isOpen={isHamburguesaModalOpen} onClose={() => setIsHamburguesaModalOpen(false)} />
+        <CrearPizzaModal isOpen={isPizzaModalOpen} onClose={() => setIsPizzaModalOpen(false)} />
+
         </div>
       </div>
     </header>
