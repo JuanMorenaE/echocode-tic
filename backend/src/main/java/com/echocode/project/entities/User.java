@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @SuperBuilder
@@ -39,8 +40,8 @@ public abstract class User {
     @Column(length = 20)
     private String phoneNumber;
 
-//    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Address> addressess
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
 
     public String getFullName() {
         return firstName + " " + lastName;

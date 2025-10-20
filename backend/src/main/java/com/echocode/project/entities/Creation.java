@@ -17,7 +17,9 @@ public class Creation
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int creationId;
 
-    private int ownerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ownerId")
+    private Client owner;
 
     private boolean isFavourite;
 
@@ -26,13 +28,14 @@ public class Creation
     private CreationType creationType;
 
     @ManyToOne
+    @JoinColumn(name = "id")
     private PizzaSize pizzaSize;
 
     @ManyToMany
     @JoinTable(
         name = "creation_ingredients",
-        joinColumns = @JoinColumn(name = "creation_id"),
-        inverseJoinColumns = @JoinColumn(name = "ingredient_id")
+        joinColumns = @JoinColumn(name = "creationId"),
+        inverseJoinColumns = @JoinColumn(name = "ingredientId")
     )
     private List<Ingredient> ingredients = new ArrayList<>();
 }

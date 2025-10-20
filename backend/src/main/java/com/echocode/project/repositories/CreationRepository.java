@@ -9,7 +9,7 @@ import java.util.List;
 public interface CreationRepository extends JpaRepository<Creation, Integer> {
     public Creation getCreationByCreationId(@NonNull Integer creationId);
 
-    public List<Creation> findAllByOwnerId(@NonNull Integer ownerId);
+    public List<Creation> findAllByOwner_UserId(@NonNull Long ownerId);
 
     public boolean existsByCreationId(@NonNull Integer creationId);
 }

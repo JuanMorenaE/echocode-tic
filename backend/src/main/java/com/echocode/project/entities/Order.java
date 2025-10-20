@@ -21,12 +21,22 @@ public class Order {
     private String orderHash;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "clientId", insertable = false, updatable = false)
-    private Client client;
+    @JoinColumn(name = "ownerId", insertable = false, updatable = false)
+    private Client owner;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "order_creations", joinColumns = @JoinColumn(name = "orderId"), inverseJoinColumns = @JoinColumn(name = "creationId"))
+    @JoinTable(
+            name = "order_creations",
+            joinColumns = @JoinColumn(name = "orderId"),
+            inverseJoinColumns = @JoinColumn(name = "creationId"))
     private List<Creation> creations;
+
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    @JoinTable(
+//            name = "order_sides",
+//            joinColumns = @JoinColumn(name = "orderId"),
+//            inverseJoinColumns = @JoinColumn(name = "sideId"))
+//    private List<Sides> sides;
 
     @NonNull
     @Temporal(TemporalType.TIMESTAMP)

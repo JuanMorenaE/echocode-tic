@@ -18,8 +18,8 @@ public class CreationService {
         return creationRepository.findAll();
     }
 
-    public List<Creation> getAllCreationsFromClient(int clientId) {
-        return creationRepository.findAllByOwnerId(clientId);
+    public List<Creation> getAllCreationsFromClient(long clientId) {
+        return creationRepository.findAllByOwner_UserId(clientId);
     }
 
     public Creation getCreationById(int creationId) throws CreationNotFoundException {

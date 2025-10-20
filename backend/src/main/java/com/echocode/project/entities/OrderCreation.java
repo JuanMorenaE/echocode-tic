@@ -6,13 +6,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Table(name = "order_creations")
 public class OrderCreation {
-    @EmbeddedId
-    private int orderCreationId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orderId")
@@ -23,6 +26,6 @@ public class OrderCreation {
     private Creation creationId;
 
     private int quantity;
-
-
 }
+
+

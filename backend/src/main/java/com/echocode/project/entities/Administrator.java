@@ -7,9 +7,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 @Getter @Setter
-@AllArgsConstructor @NoArgsConstructor
+@NoArgsConstructor
 @Table(name = "administrators")
-public class Administrator extends User {
+public class Administrator extends User
+{
     // Administrator no tiene campos adicionales por ahora
     // Hereda todos los campos de User: id, hash, email, password, firstName, lastName, phoneNumber, cedula, dirección
 }

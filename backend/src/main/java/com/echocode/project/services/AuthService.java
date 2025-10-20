@@ -36,13 +36,13 @@ public class AuthService {
 
         // Crear el cliente
         Client client = Client.builder()
-                .hash(UUID.randomUUID().toString())
+                .userHash(UUID.randomUUID().toString())
                 .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .cedula(request.getCedula())
+                .document(request.getCedula())
                 .birthdate(request.getBirthdate())
                 .build();
 
