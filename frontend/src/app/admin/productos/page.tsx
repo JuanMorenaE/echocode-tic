@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { ProductoTable } from '@/components/admin/ProductoTable';
 import { ProductoForm } from '@/components/admin/ProductoForm';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { Button } from '@/components/ui/Button';
 import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Producto } from '@/types/producto.types';
 import { useToast } from '@/context/ToastContext';
@@ -14,11 +14,11 @@ export default function ProductosPage() {
   const { success, error } = useToast();
   
   const [productos, setProductos] = useState<Producto[]>([
-    { id: 1, tipo: 'PIZZA', name: 'Napolitana', price: 580, description: 'Salsa de tomate, mozzarella fresca, albahaca' },
-    { id: 2, tipo: 'PIZZA', name: 'Pepperoni XL', price: 620, description: 'Doble pepperoni, mozzarella, orégano' },
-    { id: 3, tipo: 'HAMBURGUESA', name: 'BBQ Bacon', price: 520, description: 'Carne premium, bacon crocante, queso cheddar' },
-    { id: 4, tipo: 'HAMBURGUESA', name: 'Mega Cheese', price: 480, description: 'Doble carne, triple queso' },
-    { id: 5, tipo: 'BEBIDA', name: 'Coca Cola 500ml', price: 80, description: 'Bebida refrescante' },
+    { id: 1, tipo: 'ACOMPAÑAMIENTO', name: 'Papas Fritas', price: 150, description: 'Porción grande de papas fritas crujientes' },
+    { id: 2, tipo: 'ACOMPAÑAMIENTO', name: 'Aros de Cebolla', price: 180, description: '8 aros de cebolla rebozados' },
+    { id: 3, tipo: 'BEBIDA', name: 'Coca Cola 500ml', price: 80, description: 'Bebida refrescante' },
+    { id: 4, tipo: 'BEBIDA', name: 'Agua Mineral', price: 60, description: 'Agua mineral sin gas' },
+    { id: 5, tipo: 'BEBIDA', name: 'Cerveza Artesanal', price: 150, description: 'Cerveza artesanal de la casa' },
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,19 +77,13 @@ export default function ProductosPage() {
 
   return (
     <div className="p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Productos</h1>
-          <p className="text-gray-600 mt-2">
-            Gestiona el catálogo de pizzas, hamburguesas y más
-          </p>
-        </div>
-        <Button onClick={openCreateModal} className="flex items-center gap-2">
-          <PlusIcon size={20} />
-          Nuevo Producto
-        </Button>
-      </div>
+      <AdminHeader
+        title="Productos"
+        description="Gestiona acompañamientos y bebidas"
+        buttonText="Nuevo Producto"
+        buttonIcon={<PlusIcon size={20} />}
+        onButtonClick={openCreateModal}
+      />
 
       {/* Barra de búsqueda */}
       <div className="mb-6 flex gap-4">
