@@ -11,6 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -34,6 +36,17 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
+        // Parsear birthdate si existe
+        Date birthdate = null;
+        if (request.getBirthdate() != null && !request.getBirthdate().isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                birthdate = sdf.parse(request.getBirthdate());
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid birthdate format. Use yyyy-MM-dd");
+            }
+        }
+
         // Crear el cliente
         Client client = Client.builder()
                 .userHash(UUID.randomUUID().toString())
@@ -43,7 +56,7 @@ public class AuthService {
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
                 .document(request.getCedula())
-                .birthdate(request.getBirthdate())
+                .birthdate(birthdate)
                 .build();
 
         clientRepository.save(client);
@@ -51,11 +64,21 @@ public class AuthService {
         // Generar token
         String jwtToken = jwtService.generateToken(client.getEmail());
 
+        // Formatear birthdate para la respuesta
+        String birthdateStr = null;
+        if (client.getBirthdate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            birthdateStr = sdf.format(client.getBirthdate());
+        }
+
         return AuthResponse.builder()
                 .token(jwtToken)
                 .email(client.getEmail())
                 .firstName(client.getFirstName())
                 .lastName(client.getLastName())
+                .phoneNumber(client.getPhoneNumber())
+                .cedula(client.getDocument())
+                .birthdate(birthdateStr)
                 .message("User registered successfully")
                 .build();
     }
@@ -76,11 +99,21 @@ public class AuthService {
         // Generar token
         String jwtToken = jwtService.generateToken(client.getEmail());
 
+        // Formatear birthdate para la respuesta
+        String birthdateStr = null;
+        if (client.getBirthdate() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            birthdateStr = sdf.format(client.getBirthdate());
+        }
+
         return AuthResponse.builder()
                 .token(jwtToken)
                 .email(client.getEmail())
                 .firstName(client.getFirstName())
                 .lastName(client.getLastName())
+                .phoneNumber(client.getPhoneNumber())
+                .cedula(client.getDocument())
+                .birthdate(birthdateStr)
                 .message("Login successful")
                 .build();
     }

@@ -2,8 +2,6 @@ package com.echocode.project.dto;
 
 import lombok.*;
 
-import java.util.Date;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -15,5 +13,5 @@ public class RegisterRequest {
     private String lastName;
     private String phoneNumber;
     private String cedula;
-    private Date birthdate;
+    private String birthdate; // formato: yyyy-MM-dd
 }

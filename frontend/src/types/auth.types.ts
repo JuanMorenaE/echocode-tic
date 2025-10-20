@@ -18,10 +18,20 @@ export interface AuthResponse {
   email?: string;
   firstName?: string;
   lastName?: string;
+  phoneNumber?: string;
+  cedula?: string;
+  birthdate?: string;
   message?: string;
 }
 
 export interface AuthState {
   token?: string | null;
-  user?: { email?: string; firstName?: string; lastName?: string } | null;
+  user?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    cedula?: string;
+    birthdate?: string;
+  } | null;
 }

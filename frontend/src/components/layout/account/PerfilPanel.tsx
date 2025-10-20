@@ -11,14 +11,14 @@ const PerfilPanel: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Estado para los datos editables (mock data por ahora)
+  // Estado para los datos editables
   const [formData, setFormData] = useState({
-    firstName: state?.user?.firstName || 'Juan',
-    lastName: state?.user?.lastName || 'Pérez',
-    email: state?.user?.email || 'juan@example.com',
-    phoneNumber: '099 123 456',
-    cedula: '12345678',
-    birthdate: '1990-01-15',
+    firstName: state?.user?.firstName || '',
+    lastName: state?.user?.lastName || '',
+    email: state?.user?.email || '',
+    phoneNumber: state?.user?.phoneNumber || '',
+    cedula: state?.user?.cedula || '',
+    birthdate: state?.user?.birthdate || '',
   });
 
   const handleActualizar = async () => {
@@ -43,12 +43,12 @@ const PerfilPanel: React.FC = () => {
   const handleCancelar = () => {
     // Restaurar datos originales
     setFormData({
-      firstName: state?.user?.firstName || 'Juan',
-      lastName: state?.user?.lastName || 'Pérez',
-      email: state?.user?.email || 'juan@example.com',
-      phoneNumber: '099 123 456',
-      cedula: '12345678',
-      birthdate: '1990-01-15',
+      firstName: state?.user?.firstName || '',
+      lastName: state?.user?.lastName || '',
+      email: state?.user?.email || '',
+      phoneNumber: state?.user?.phoneNumber || '',
+      cedula: state?.user?.cedula || '',
+      birthdate: state?.user?.birthdate || '',
     });
     setIsEditing(false);
   };
@@ -97,6 +97,19 @@ const PerfilPanel: React.FC = () => {
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
             />
+
+            <Input
+              label="Cédula"
+              value={formData.cedula}
+              onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
+            />
+
+            <Input
+              label="Fecha de nacimiento"
+              type="date"
+              value={formData.birthdate}
+              onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+            />
           </div>
 
           <div className="flex gap-3 justify-end pt-4">
@@ -128,7 +141,17 @@ const PerfilPanel: React.FC = () => {
 
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-sm text-gray-600 mb-1">Teléfono</p>
-            <p className="font-medium text-gray-900">{formData.phoneNumber}</p>
+            <p className="font-medium text-gray-900">{formData.phoneNumber || 'No especificado'}</p>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Cédula</p>
+            <p className="font-medium text-gray-900">{formData.cedula || 'No especificada'}</p>
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="text-sm text-gray-600 mb-1">Fecha de nacimiento</p>
+            <p className="font-medium text-gray-900">{formData.birthdate || 'No especificada'}</p>
           </div>
         </div>
       )}

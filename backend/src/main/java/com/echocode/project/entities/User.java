@@ -28,13 +28,13 @@ public abstract class User {
     @Column(length = 200, unique = true, nullable = false)
     private String email;
 
-    @Column( length = 36, nullable = false)
+    @Column(length = 60, nullable = false)
     private String passwordHash;
 
-    @Column(length = 36)
+    @Column(length = 100)
     private String firstName;
 
-    @Column(length = 36)
+    @Column(length = 100)
     private String lastName;
 
     @Column(length = 20)

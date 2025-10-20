@@ -22,8 +22,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const email = localStorage.getItem('email');
       const firstName = localStorage.getItem('firstName');
       const lastName = localStorage.getItem('lastName');
+      const phoneNumber = localStorage.getItem('phoneNumber');
+      const cedula = localStorage.getItem('cedula');
+      const birthdate = localStorage.getItem('birthdate');
       if (token) {
-        setState({ token, user: { email: email || undefined, firstName: firstName || undefined, lastName: lastName || undefined } });
+        setState({
+          token,
+          user: {
+            email: email || undefined,
+            firstName: firstName || undefined,
+            lastName: lastName || undefined,
+            phoneNumber: phoneNumber || undefined,
+            cedula: cedula || undefined,
+            birthdate: birthdate || undefined,
+          }
+        });
       }
     }
   }, []);
@@ -35,7 +48,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.email) localStorage.setItem('email', res.email);
       if (res.firstName) localStorage.setItem('firstName', res.firstName);
       if (res.lastName) localStorage.setItem('lastName', res.lastName);
-      setState({ token: res.token, user: { email: res.email, firstName: res.firstName, lastName: res.lastName } });
+      if (res.phoneNumber) localStorage.setItem('phoneNumber', res.phoneNumber);
+      if (res.cedula) localStorage.setItem('cedula', res.cedula);
+      if (res.birthdate) localStorage.setItem('birthdate', res.birthdate);
+      setState({
+        token: res.token,
+        user: {
+          email: res.email,
+          firstName: res.firstName,
+          lastName: res.lastName,
+          phoneNumber: res.phoneNumber,
+          cedula: res.cedula,
+          birthdate: res.birthdate,
+        }
+      });
     } else {
       throw new Error(res.message || 'Login failed');
     }
@@ -48,7 +74,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.email) localStorage.setItem('email', res.email);
       if (res.firstName) localStorage.setItem('firstName', res.firstName);
       if (res.lastName) localStorage.setItem('lastName', res.lastName);
-      setState({ token: res.token, user: { email: res.email, firstName: res.firstName, lastName: res.lastName } });
+      if (res.phoneNumber) localStorage.setItem('phoneNumber', res.phoneNumber);
+      if (res.cedula) localStorage.setItem('cedula', res.cedula);
+      if (res.birthdate) localStorage.setItem('birthdate', res.birthdate);
+      setState({
+        token: res.token,
+        user: {
+          email: res.email,
+          firstName: res.firstName,
+          lastName: res.lastName,
+          phoneNumber: res.phoneNumber,
+          cedula: res.cedula,
+          birthdate: res.birthdate,
+        }
+      });
     } else {
       throw new Error(res.message || 'Register failed');
     }
@@ -59,6 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('email');
     localStorage.removeItem('firstName');
     localStorage.removeItem('lastName');
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('cedula');
+    localStorage.removeItem('birthdate');
     setState({ token: null, user: null });
     if (typeof window !== 'undefined') {
       window.location.href = '/login';

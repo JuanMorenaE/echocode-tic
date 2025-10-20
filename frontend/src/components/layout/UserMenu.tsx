@@ -33,16 +33,17 @@ export const UserMenu: React.FC = () => {
     return 'U';
   };
 
-  // if (!state?.token) {
-  //   return (
-  //     <a
-  //       href="/login"
-  //       className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 hover:shadow-lg transition-all duration-200 cursor-pointer"
-  //     >
-  //       <UserIcon size={20} className="text-primary-600" />
-  //     </a>
-  //   );
-  // }
+  // Si no hay usuario autenticado, mostrar botón de login
+  if (!state?.token) {
+    return (
+      <a
+        href="/login"
+        className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 hover:shadow-lg transition-all duration-200 cursor-pointer"
+      >
+        <UserIcon size={20} className="text-primary-600" />
+      </a>
+    );
+  }
 
   return (
     <div className="relative z-[60]" ref={ref}>

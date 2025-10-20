@@ -82,7 +82,7 @@ export const RegisterForm = () => {
         lastName: formData.apellido,
         phoneNumber: formData.telefono,
         cedula: formData.cedula,
-        birthdate: formData.birthdate ? new Date(formData.birthdate) : null,
+        birthdate: formData.birthdate || null,
       });
       router.push('/');
     } catch (error) {
