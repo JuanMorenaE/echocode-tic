@@ -8,21 +8,15 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
 @SuperBuilder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "clients")
 public class Client extends User {
     @Temporal(TemporalType.DATE)
     @Column(name = "birthdate")
     private Date birthdate;
 
-    @ElementCollection
-    @CollectionTable(name = "client_addresses", joinColumns = @JoinColumn(name = "client_id"))
-    @Column(name = "address")
-    private List<String> addresses;
-
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Card> cards;
 }

@@ -4,39 +4,43 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 @SuperBuilder
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Table(name = "users")
 public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
-    private long id;
+    private long userId;
 
-    @Column(name = "hash", unique = true)
-    private String hash;
+    @Column(unique = true)
+    private String userHash;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @NonNull
+    @Column(unique = true)
+    private String document;
+
+    @Column(length = 200, unique = true, nullable = false)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column( length = 36, nullable = false)
+    private String passwordHash;
 
-    @Column(name = "first_name")
+    @Column(length = 36)
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(length = 36)
     private String lastName;
 
-    @Column(name = "phone_number")
+    @Column(length = 20)
     private String phoneNumber;
 
-    @Column(name = "cedula")
-    private String cedula;
+//    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Address> addressess
 
     public String getFullName() {
         return firstName + " " + lastName;

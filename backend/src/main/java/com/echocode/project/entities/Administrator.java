@@ -5,10 +5,9 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
 @SuperBuilder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "administrators")
 public class Administrator extends User {
     // Administrator no tiene campos adicionales por ahora

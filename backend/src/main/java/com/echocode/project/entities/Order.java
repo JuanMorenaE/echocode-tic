@@ -2,52 +2,46 @@ package com.echocode.project.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "orders")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_id")
     private int orderId;
 
-    @Column(name = "order_hash", unique = true)
+    @Column(length = 36)
     private String orderHash;
 
-    @Column(name = "client_id")
-    private int clientId;
-
-    @OneToOne
-    @JoinColumn(name = "CLIENT_ID", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "clientId", insertable = false, updatable = false)
     private Client client;
 
-    @ElementCollection
-    @CollectionTable(name = "order_products", joinColumns = @JoinColumn(name = "order_id"))
-    @Column(name = "product_id")
-    private List<Integer> productsList;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "order_creations", joinColumns = @JoinColumn(name = "orderId"), inverseJoinColumns = @JoinColumn(name = "creationId"))
+    private List<Creation> creations;
 
+    @NonNull
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "order_date")
-    private Date orderDate;
+    private LocalDateTime orderDate;
 
-    @Column(name = "order_status")
-    private Order_status orderStatus;
+    @NonNull
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
 
-    @Column(name = "total")
     private double total;
 
 
 }
 
-enum Order_status {
+enum OrderStatus {
     QUEUED,
     PREPARING,
     ON_THE_WAY,

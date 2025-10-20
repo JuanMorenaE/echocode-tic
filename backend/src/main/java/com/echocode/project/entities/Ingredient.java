@@ -4,30 +4,31 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "ingredients")
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ingredientid")
     private int ingredientId;
 
-    @Column(name = "ingredientname")
+    @NonNull
+    @Column(length = 20)
     private String ingredientName;
 
-    @Column(name = "ingredienttype")
-    private String ingredientType;
+    @NonNull
+    private IngredientType ingredientType;
 
-    @Column(name = "category")
+    @NonNull
     private String category;
 
-    @Column(name = "price")
     private double price;
 
-    @Column(name = "is_enabled")
     private boolean isEnabled;
+}
+
+enum IngredientType {
+    BURGER,
+    PIZZA,
 }

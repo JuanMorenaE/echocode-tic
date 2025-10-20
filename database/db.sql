@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS users (
     userId serial primary key,
     userHash varchar(36) not null,
+    document varchar(20) not null,
     email varchar(200) not null,
     passwordHash varchar(32) not null,
     firstName varchar(30) not null,
@@ -12,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS clients (
     userId int primary key references users(userId),
-    document varchar(20) not null,
     birthdate date not null
 );
 
@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS order_creations (
     orderId serial primary key references orders(orderId),
     creationId serial primary key references creations(creationId),
+    quantity int not null default 1
 )
 
 

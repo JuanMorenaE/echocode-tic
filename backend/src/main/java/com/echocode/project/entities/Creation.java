@@ -6,15 +6,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Builder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "creations")
-public class Creation {
-    
+public class Creation
+{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int creationId;
@@ -25,11 +23,9 @@ public class Creation {
 
     @NonNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "creation_type")
     private CreationType creationType;
 
     @ManyToOne
-    @JoinColumn(name = "pizza_size_id")
     private PizzaSize pizzaSize;
 
     @ManyToMany

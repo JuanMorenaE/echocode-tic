@@ -6,11 +6,9 @@ import lombok.*;
 import java.util.Date;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@Getter @Setter
+@AllArgsConstructor @NoArgsConstructor
 @Table(name = "cards")
 public class Card {
     @Id
@@ -29,6 +27,6 @@ public class Card {
     private short cvv;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "userId")
     private Client client;
 }
