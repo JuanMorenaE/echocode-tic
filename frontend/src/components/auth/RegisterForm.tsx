@@ -14,7 +14,9 @@ export const RegisterForm = () => {
     nombre: '',
     apellido: '',
     email: '',
-    telefono: '',
+  telefono: '',
+  cedula: '',
+  birthdate: '',
     password: '',
     confirmPassword: '',
   });
@@ -45,6 +47,12 @@ export const RegisterForm = () => {
       newErrors.telefono = 'Teléfono inválido (mínimo 8 dígitos)';
     }
 
+    if (!formData.cedula) {
+      newErrors.cedula = 'La cédula es requerida';
+    } else if (!/^\d{6,}$/.test(formData.cedula.replace(/\s/g, ''))) {
+      newErrors.cedula = 'Cédula inválida (mínimo 6 dígitos)';
+    }
+
     if (!formData.password) {
       newErrors.password = 'La contraseña es requerida';
     } else if (formData.password.length < 8) {
@@ -73,6 +81,8 @@ export const RegisterForm = () => {
         firstName: formData.nombre,
         lastName: formData.apellido,
         phoneNumber: formData.telefono,
+        cedula: formData.cedula,
+        birthdate: formData.birthdate ? new Date(formData.birthdate) : null,
       });
       router.push('/');
     } catch (error) {
@@ -99,6 +109,22 @@ export const RegisterForm = () => {
           value={formData.apellido}
           onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
           error={errors.apellido}
+        />
+        
+        <Input
+          label="Cédula"
+          placeholder="12345678"
+          value={formData.cedula}
+          onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
+          error={errors.cedula}
+        />
+
+        <Input
+          label="Fecha de nacimiento"
+          type="date"
+          value={formData.birthdate}
+          onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+          error={errors.birthdate}
         />
       </div>
 
