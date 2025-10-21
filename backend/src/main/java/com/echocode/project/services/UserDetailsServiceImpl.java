@@ -28,4 +28,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .authorities(new ArrayList<>())
                 .build();
     }
+
+    /**
+     * Carga UserDetails a partir del id del cliente (userId).
+     */
+    public UserDetails loadUserById(Long id) throws UsernameNotFoundException {
+    Client client = clientRepository.findById(id)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
+
+    return User.builder()
+        .username(client.getEmail())
+        .password(client.getPasswordHash())
+        .authorities(new ArrayList<>())
+        .build();
+    }
 }

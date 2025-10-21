@@ -5,9 +5,10 @@ import useAuth from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PencilSimpleIcon } from '@/components/icons';
+import userApi from '@/services/api/userApi';
 
 const PerfilPanel: React.FC = () => {
-  const { state } = useAuth();
+  const { state, updateUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -24,14 +25,27 @@ const PerfilPanel: React.FC = () => {
   const handleActualizar = async () => {
     setIsSaving(true);
     try {
-      // TODO: Conectar con API para actualizar perfil
-      // await updateProfile(formData);
+      const response = await userApi.updateProfile({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        cedula: formData.cedula,
+        birthdate: formData.birthdate,
+      });
 
-      // Simulación de delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Actualizar el estado global del auth con los nuevos datos
+      updateUser({
+        firstName: response.firstName,
+        lastName: response.lastName,
+        email: response.email,
+        phoneNumber: response.phoneNumber,
+        cedula: response.cedula,
+        birthdate: response.birthdate,
+      });
 
       setIsEditing(false);
-      // TODO: Actualizar el estado global del auth con los nuevos datos
+      alert('Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error al actualizar perfil:', error);
       alert('Error al actualizar el perfil');

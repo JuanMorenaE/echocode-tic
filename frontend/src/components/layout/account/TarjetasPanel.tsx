@@ -1,131 +1,195 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { CreditCardIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
+import cardApi from '@/services/api/cardApi';
+import type { Card, CardRequest, CardType } from '@/types/card.types';
 
-interface Tarjeta {
-  id: number;
-  alias: string;
-  titular: string;
-  ultimos4Digitos: string;
-  tipoTarjeta: 'visa' | 'mastercard' | 'amex' | 'otra';
-  fechaVencimiento: string;
-  esPredeterminada: boolean;
-}
+const CARD_TYPES: { value: CardType; label: string }[] = [
+  { value: 'VISA', label: 'Visa' },
+  { value: 'MASTERCARD', label: 'Mastercard' },
+  { value: 'AMEX', label: 'American Express' },
+  { value: 'PREX', label: 'Prex' },
+  { value: 'OCA', label: 'OCA' },
+  { value: 'OTHER', label: 'Otra' },
+];
 
 const TarjetasPanel: React.FC = () => {
-  const [tarjetas, setTarjetas] = useState<Tarjeta[]>([
-    {
-      id: 1,
-      alias: 'Visa Personal',
-      titular: 'Juan Pérez',
-      ultimos4Digitos: '4242',
-      tipoTarjeta: 'visa',
-      fechaVencimiento: '12/25',
-      esPredeterminada: true,
-    },
-    {
-      id: 2,
-      alias: 'Mastercard',
-      titular: 'Juan Pérez',
-      ultimos4Digitos: '8888',
-      tipoTarjeta: 'mastercard',
-      fechaVencimiento: '08/26',
-      esPredeterminada: false,
-    },
-  ]);
-
+  const [tarjetas, setTarjetas] = useState<Card[]>([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [nuevaTarjeta, setNuevaTarjeta] = useState<Partial<Tarjeta & { numeroCompleto: string; cvv: string }>>({
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [nuevaTarjeta, setNuevaTarjeta] = useState<Partial<CardRequest & { cvv: string }>>({
     alias: '',
-    titular: '',
-    numeroCompleto: '',
-    tipoTarjeta: 'visa',
-    fechaVencimiento: '',
+    cardholderName: '',
+    cardNumber: '',
+    expirationDate: '',
+    cardType: 'VISA',
     cvv: '',
-    esPredeterminada: false,
+    isDefault: false,
   });
 
-  const detectarTipoTarjeta = (numero: string): 'visa' | 'mastercard' | 'amex' | 'otra' => {
-    const primerDigito = numero[0];
-    if (primerDigito === '4') return 'visa';
-    if (primerDigito === '5') return 'mastercard';
-    if (primerDigito === '3') return 'amex';
-    return 'otra';
+  // Cargar tarjetas al montar el componente
+  useEffect(() => {
+    loadCards();
+  }, []);
+
+  const loadCards = async () => {
+    setIsLoading(true);
+    try {
+      const data = await cardApi.getAll();
+      setTarjetas(data);
+    } catch (error) {
+      console.error('Error cargando tarjetas:', error);
+      alert('Error al cargar las tarjetas');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleAgregarTarjeta = () => {
-    if (!nuevaTarjeta.alias || !nuevaTarjeta.titular || !nuevaTarjeta.numeroCompleto || !nuevaTarjeta.fechaVencimiento || !nuevaTarjeta.cvv) {
+
+  const handleAgregarTarjeta = async () => {
+    if (!nuevaTarjeta.alias || !nuevaTarjeta.cardholderName || !nuevaTarjeta.cardNumber || !nuevaTarjeta.expirationDate || !nuevaTarjeta.cvv || !nuevaTarjeta.cardType) {
       alert('Por favor completa todos los campos');
       return;
     }
 
-    // Validar formato de número (solo dígitos, 16 caracteres)
-    const soloDigitos = nuevaTarjeta.numeroCompleto!.replace(/\s/g, '');
+    // Validar formato de número (solo dígitos, 15-16 caracteres)
+    const soloDigitos = nuevaTarjeta.cardNumber!.replace(/\s/g, '');
     if (soloDigitos.length < 15 || soloDigitos.length > 16) {
       alert('Número de tarjeta inválido');
       return;
     }
 
-    const ultimos4 = soloDigitos.slice(-4);
-    const tipo = detectarTipoTarjeta(soloDigitos);
+    // Validar formato de vencimiento (MM/YY)
+    const expirationParts = nuevaTarjeta.expirationDate!.split('/');
+    if (expirationParts.length !== 2 || expirationParts[0].length !== 2 || expirationParts[1].length !== 2) {
+      alert('Formato de vencimiento inválido. Usa MM/YY');
+      return;
+    }
 
-    const tarjeta: Tarjeta = {
-      id: Date.now(),
-      alias: nuevaTarjeta.alias!,
-      titular: nuevaTarjeta.titular!,
-      ultimos4Digitos: ultimos4,
-      tipoTarjeta: tipo,
-      fechaVencimiento: nuevaTarjeta.fechaVencimiento!,
-      esPredeterminada: false,
-    };
+    setIsSaving(true);
+    try {
+      const request: CardRequest = {
+        alias: nuevaTarjeta.alias!,
+        cardholderName: nuevaTarjeta.cardholderName!,
+        cardNumber: soloDigitos,
+        expirationDate: nuevaTarjeta.expirationDate!,
+        cardType: nuevaTarjeta.cardType!,
+        isDefault: nuevaTarjeta.isDefault || false,
+      };
 
-    setTarjetas([...tarjetas, tarjeta]);
-    setNuevaTarjeta({
-      alias: '',
-      titular: '',
-      numeroCompleto: '',
-      tipoTarjeta: 'visa',
-      fechaVencimiento: '',
-      cvv: '',
-      esPredeterminada: false,
-    });
-    setMostrarFormulario(false);
-  };
+      await cardApi.create(request);
+      await loadCards(); // Recargar lista
 
-  const handleEliminarTarjeta = (id: number) => {
-    setTarjetas(tarjetas.filter(t => t.id !== id));
-  };
-
-  const handleMarcarPredeterminada = (id: number) => {
-    setTarjetas(
-      tarjetas.map(t => ({
-        ...t,
-        esPredeterminada: t.id === id,
-      }))
-    );
-  };
-
-  const obtenerIconoTarjeta = (tipo: string) => {
-    switch (tipo) {
-      case 'visa':
-        return '💳 Visa';
-      case 'mastercard':
-        return '💳 Mastercard';
-      case 'amex':
-        return '💳 Amex';
-      default:
-        return '💳 Otra';
+      // Resetear formulario
+      setNuevaTarjeta({
+        alias: '',
+        cardholderName: '',
+        cardNumber: '',
+        expirationDate: '',
+        cardType: 'VISA',
+        cvv: '',
+        isDefault: false,
+      });
+      setMostrarFormulario(false);
+    } catch (error) {
+      console.error('Error creando tarjeta:', error);
+      alert('Error al guardar la tarjeta');
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  const handleEliminarTarjeta = async (id: number) => {
+    if (!confirm('¿Estás seguro de eliminar esta tarjeta?')) {
+      return;
+    }
+
+    try {
+      await cardApi.delete(id);
+      await loadCards(); // Recargar lista
+    } catch (error) {
+      console.error('Error eliminando tarjeta:', error);
+      alert('Error al eliminar la tarjeta');
+    }
+  };
+
+  const handleMarcarPredeterminada = async (id: number) => {
+    try {
+      const tarjeta = tarjetas.find(t => t.id === id);
+      if (!tarjeta) return;
+
+      const request: CardRequest = {
+        alias: tarjeta.alias,
+        cardholderName: tarjeta.cardholderName,
+        cardNumber: tarjeta.last4Digits, // Backend solo necesita esto para actualizar
+        expirationDate: tarjeta.expirationDate,
+        cardType: tarjeta.cardType,
+        isDefault: true,
+      };
+
+      await cardApi.update(id, request);
+      await loadCards(); // Recargar lista
+    } catch (error) {
+      console.error('Error marcando tarjeta como predeterminada:', error);
+      alert('Error al actualizar la tarjeta');
+    }
+  };
+
+  const obtenerIconoTarjeta = (tipo: CardType) => {
+  const label = (() => {
+    switch (tipo) {
+      case 'VISA':
+        return 'Visa';
+      case 'MASTERCARD':
+        return 'Mastercard';
+      case 'AMEX':
+        return 'Amex';
+      case 'PREX':
+        return 'Prex';
+      case 'OCA':
+        return 'OCA';
+      default:
+        return 'Otra';
+    }
+  })();
+
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <div className="flex items-center gap-2">
+        <CreditCardIcon size={28} className="text-gray-600" weight="regular" />
+        <span className="text-sm font-medium text-gray-700">{label}</span>
+      </div>
+    </div>
+  );
+};
+
 
   const formatearNumero = (valor: string) => {
     const soloDigitos = valor.replace(/\D/g, '');
     const grupos = soloDigitos.match(/.{1,4}/g);
     return grupos ? grupos.join(' ') : soloDigitos;
   };
+
+  const formatearVencimiento = (valor: string) => {
+    const soloDigitos = valor.replace(/\D/g, '');
+    if (soloDigitos.length >= 2) {
+      return soloDigitos.slice(0, 2) + '/' + soloDigitos.slice(2, 4);
+    }
+    return soloDigitos;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <p className="text-gray-600">Cargando tarjetas...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -160,8 +224,8 @@ const TarjetasPanel: React.FC = () => {
               <Input
                 label="Titular *"
                 placeholder="Nombre como aparece en la tarjeta"
-                value={nuevaTarjeta.titular}
-                onChange={(e) => setNuevaTarjeta({ ...nuevaTarjeta, titular: e.target.value })}
+                value={nuevaTarjeta.cardholderName}
+                onChange={(e) => setNuevaTarjeta({ ...nuevaTarjeta, cardholderName: e.target.value })}
               />
             </div>
 
@@ -169,25 +233,29 @@ const TarjetasPanel: React.FC = () => {
               <Input
                 label="Número de Tarjeta *"
                 placeholder="1234 5678 9012 3456"
-                value={nuevaTarjeta.numeroCompleto}
+                value={nuevaTarjeta.cardNumber}
                 onChange={(e) => {
                   const formateado = formatearNumero(e.target.value);
-                  setNuevaTarjeta({ ...nuevaTarjeta, numeroCompleto: formateado });
+                  setNuevaTarjeta({ ...nuevaTarjeta, cardNumber: formateado });
                 }}
                 maxLength={19}
               />
             </div>
 
+            <Select
+              label="Tipo de Tarjeta *"
+              value={nuevaTarjeta.cardType}
+              onChange={(e) => setNuevaTarjeta({ ...nuevaTarjeta, cardType: e.target.value as CardType })}
+              options={CARD_TYPES.map((type) => ({ value: type.value, label: type.label }))}
+            />
+
             <Input
               label="Vencimiento *"
-              placeholder="MM/AA"
-              value={nuevaTarjeta.fechaVencimiento}
+              placeholder="MM/YY"
+              value={nuevaTarjeta.expirationDate}
               onChange={(e) => {
-                let valor = e.target.value.replace(/\D/g, '');
-                if (valor.length >= 2) {
-                  valor = valor.slice(0, 2) + '/' + valor.slice(2, 4);
-                }
-                setNuevaTarjeta({ ...nuevaTarjeta, fechaVencimiento: valor });
+                const formateado = formatearVencimiento(e.target.value);
+                setNuevaTarjeta({ ...nuevaTarjeta, expirationDate: formateado });
               }}
               maxLength={5}
             />
@@ -206,10 +274,10 @@ const TarjetasPanel: React.FC = () => {
           </div>
 
           <div className="flex gap-3 justify-end pr-12 md:pr-16">
-            <Button variant="ghost" onClick={() => setMostrarFormulario(false)}>
+            <Button variant="ghost" onClick={() => setMostrarFormulario(false)} disabled={isSaving}>
               Cancelar
             </Button>
-            <Button onClick={handleAgregarTarjeta}>
+            <Button onClick={handleAgregarTarjeta} isLoading={isSaving}>
               Agregar
             </Button>
           </div>
@@ -228,31 +296,35 @@ const TarjetasPanel: React.FC = () => {
             <div
               key={tarjeta.id}
               className={`p-4 rounded-lg border-2 transition-all ${
-                tarjeta.esPredeterminada
+                tarjeta.isDefault
                   ? 'border-primary-500 bg-primary-50'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{obtenerIconoTarjeta(tarjeta.tipoTarjeta)}</span>
-                    <h3 className="font-semibold text-gray-900">{tarjeta.alias}</h3>
-                    {tarjeta.esPredeterminada && (
-                      <span className="bg-primary-600 text-white text-xs px-2 py-1 rounded-full">
-                        Predeterminada
-                      </span>
-                    )}
+                  <div className="flex items-center mb-2">
+                    {/* Ícono + tipo + etiqueta predeterminada a la izquierda */}
+                    <div className="flex items-center gap-2">
+                      {obtenerIconoTarjeta(tarjeta.cardType)}
+                      {tarjeta.isDefault && (
+                        <span className="bg-primary-400 text-white text-xs px-2 py-1 rounded-full">
+                          Predeterminada
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-gray-700">{tarjeta.titular}</p>
+
+                  <p className="text-gray-700">{tarjeta.cardholderName}</p>
                   <p className="text-gray-600 text-sm font-mono">
-                    •••• •••• •••• {tarjeta.ultimos4Digitos}
+                    •••• •••• •••• {tarjeta.last4Digits}
                   </p>
-                  <p className="text-gray-500 text-xs">Vence: {tarjeta.fechaVencimiento}</p>
+                  <p className="text-gray-500 text-xs">Vence: {tarjeta.expirationDate}</p>
                 </div>
 
-                <div className="flex gap-2 pr-12 md:pr-16">
-                  {!tarjeta.esPredeterminada && (
+
+                <div className="flex gap-2">
+                  {!tarjeta.isDefault && (
                     <button
                       onClick={() => handleMarcarPredeterminada(tarjeta.id)}
                       className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"

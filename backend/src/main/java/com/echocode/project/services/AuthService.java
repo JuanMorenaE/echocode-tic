@@ -61,8 +61,8 @@ public class AuthService {
 
         clientRepository.save(client);
 
-        // Generar token
-        String jwtToken = jwtService.generateToken(client.getEmail());
+    // Generar token (ahora incluimos userId como claim)
+    String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId());
 
         // Formatear birthdate para la respuesta
         String birthdateStr = null;
@@ -96,8 +96,8 @@ public class AuthService {
         Client client = clientRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Generar token
-        String jwtToken = jwtService.generateToken(client.getEmail());
+    // Generar token (ahora incluimos userId como claim)
+    String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId());
 
         // Formatear birthdate para la respuesta
         String birthdateStr = null;

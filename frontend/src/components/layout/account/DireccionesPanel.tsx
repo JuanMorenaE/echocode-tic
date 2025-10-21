@@ -1,103 +1,133 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { MapPinIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
-
-interface Direccion {
-  id: number;
-  alias: string;
-  calle: string;
-  numero: string;
-  apartamento?: string;
-  ciudad: string;
-  departamento: string;
-  codigoPostal: string;
-  esPredeterminada: boolean;
-}
+import addressApi from '@/services/api/addressApi';
+import type { Address, AddressRequest } from '@/types/address.types';
 
 const DireccionesPanel: React.FC = () => {
-  const [direcciones, setDirecciones] = useState<Direccion[]>([
-    {
-      id: 1,
-      alias: 'Casa',
-      calle: 'Av. 18 de Julio',
-      numero: '1234',
-      ciudad: 'Montevideo',
-      departamento: 'Montevideo',
-      codigoPostal: '11200',
-      esPredeterminada: true,
-    },
-    {
-      id: 2,
-      alias: 'Trabajo',
-      calle: 'Bulevar Artigas',
-      numero: '5678',
-      apartamento: '301',
-      ciudad: 'Montevideo',
-      departamento: 'Montevideo',
-      codigoPostal: '11300',
-      esPredeterminada: false,
-    },
-  ]);
-
+  const [direcciones, setDirecciones] = useState<Address[]>([]);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [nuevaDireccion, setNuevaDireccion] = useState<Partial<Direccion>>({
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [nuevaDireccion, setNuevaDireccion] = useState<Partial<AddressRequest>>({
     alias: '',
-    calle: '',
-    numero: '',
-    apartamento: '',
-    ciudad: '',
-    departamento: '',
-    codigoPostal: '',
-    esPredeterminada: false,
+    street: '',
+    number: '',
+    apartmentNumber: '',
+    city: '',
+    zipCode: '',
+    additionalInfo: '',
+    isDefault: false,
   });
 
-  const handleAgregarDireccion = () => {
-    if (!nuevaDireccion.alias || !nuevaDireccion.calle || !nuevaDireccion.numero || !nuevaDireccion.ciudad) {
-      alert('Por favor completa los campos obligatorios');
+  // Cargar direcciones al montar el componente
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const loadAddresses = async () => {
+    setIsLoading(true);
+    try {
+      const data = await addressApi.getAll();
+      setDirecciones(data);
+    } catch (error) {
+      console.error('Error cargando direcciones:', error);
+      alert('Error al cargar las direcciones');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAgregarDireccion = async () => {
+    if (!nuevaDireccion.alias || !nuevaDireccion.street || !nuevaDireccion.number || !nuevaDireccion.city || !nuevaDireccion.zipCode) {
+      alert('Por favor completa los campos obligatorios (Alias, Calle, Número, Ciudad, Código Postal)');
       return;
     }
 
-    const direccion: Direccion = {
-      id: Date.now(),
-      alias: nuevaDireccion.alias!,
-      calle: nuevaDireccion.calle!,
-      numero: nuevaDireccion.numero!,
-      apartamento: nuevaDireccion.apartamento,
-      ciudad: nuevaDireccion.ciudad!,
-      departamento: nuevaDireccion.departamento || '',
-      codigoPostal: nuevaDireccion.codigoPostal || '',
-      esPredeterminada: false,
-    };
+    setIsSaving(true);
+    try {
+      const request: AddressRequest = {
+        alias: nuevaDireccion.alias!,
+        street: nuevaDireccion.street!,
+        number: nuevaDireccion.number!,
+        apartmentNumber: nuevaDireccion.apartmentNumber || '',
+        city: nuevaDireccion.city!,
+        zipCode: nuevaDireccion.zipCode!,
+        additionalInfo: nuevaDireccion.additionalInfo || '',
+        isDefault: nuevaDireccion.isDefault || false,
+      };
 
-    setDirecciones([...direcciones, direccion]);
-    setNuevaDireccion({
-      alias: '',
-      calle: '',
-      numero: '',
-      apartamento: '',
-      ciudad: '',
-      departamento: '',
-      codigoPostal: '',
-      esPredeterminada: false,
-    });
-    setMostrarFormulario(false);
+      await addressApi.create(request);
+      await loadAddresses(); // Recargar lista
+
+      // Resetear formulario
+      setNuevaDireccion({
+        alias: '',
+        street: '',
+        number: '',
+        apartmentNumber: '',
+        city: '',
+        zipCode: '',
+        additionalInfo: '',
+        isDefault: false,
+      });
+      setMostrarFormulario(false);
+    } catch (error) {
+      console.error('Error creando dirección:', error);
+      alert('Error al guardar la dirección');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleEliminarDireccion = (id: number) => {
-    setDirecciones(direcciones.filter(d => d.id !== id));
+  const handleEliminarDireccion = async (id: number) => {
+    if (!confirm('¿Estás seguro de eliminar esta dirección?')) {
+      return;
+    }
+
+    try {
+      await addressApi.delete(id);
+      await loadAddresses(); // Recargar lista
+    } catch (error) {
+      console.error('Error eliminando dirección:', error);
+      alert('Error al eliminar la dirección');
+    }
   };
 
-  const handleMarcarPredeterminada = (id: number) => {
-    setDirecciones(
-      direcciones.map(d => ({
-        ...d,
-        esPredeterminada: d.id === id,
-      }))
+  const handleMarcarPredeterminada = async (id: number) => {
+    try {
+      const direccion = direcciones.find(d => d.id === id);
+      if (!direccion) return;
+
+      const request: AddressRequest = {
+        alias: direccion.alias,
+        street: direccion.street,
+        number: direccion.number,
+        apartmentNumber: direccion.apartmentNumber,
+        city: direccion.city,
+        zipCode: direccion.zipCode,
+        additionalInfo: direccion.additionalInfo,
+        isDefault: true,
+      };
+
+      await addressApi.update(id, request);
+      await loadAddresses(); // Recargar lista
+    } catch (error) {
+      console.error('Error marcando dirección como predeterminada:', error);
+      alert('Error al actualizar la dirección');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <p className="text-gray-600">Cargando direcciones...</p>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -128,51 +158,53 @@ const DireccionesPanel: React.FC = () => {
             <Input
               label="Calle *"
               placeholder="Ej: Av. 18 de Julio"
-              value={nuevaDireccion.calle}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, calle: e.target.value })}
+              value={nuevaDireccion.street}
+              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, street: e.target.value })}
             />
 
             <Input
               label="Número *"
               placeholder="1234"
-              value={nuevaDireccion.numero}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, numero: e.target.value })}
+              value={nuevaDireccion.number}
+              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, number: e.target.value })}
             />
 
             <Input
               label="Apartamento"
               placeholder="301"
-              value={nuevaDireccion.apartamento}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, apartamento: e.target.value })}
+              value={nuevaDireccion.apartmentNumber}
+              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, apartmentNumber: e.target.value })}
             />
 
             <Input
               label="Ciudad *"
               placeholder="Montevideo"
-              value={nuevaDireccion.ciudad}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, ciudad: e.target.value })}
+              value={nuevaDireccion.city}
+              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, city: e.target.value })}
             />
 
             <Input
-              label="Departamento"
-              placeholder="Montevideo"
-              value={nuevaDireccion.departamento}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, departamento: e.target.value })}
-            />
-
-            <Input
-              label="Código Postal"
+              label="Código Postal *"
               placeholder="11200"
-              value={nuevaDireccion.codigoPostal}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, codigoPostal: e.target.value })}
+              value={nuevaDireccion.zipCode}
+              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, zipCode: e.target.value })}
             />
+
+            <div className="md:col-span-2">
+              <Input
+                label="Información adicional"
+                placeholder="Ej: Portón verde, Timbre 2"
+                value={nuevaDireccion.additionalInfo}
+                onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, additionalInfo: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="flex gap-3 justify-end pr-12 md:pr-16">
-            <Button variant="ghost" onClick={() => setMostrarFormulario(false)}>
+            <Button variant="ghost" onClick={() => setMostrarFormulario(false)} disabled={isSaving}>
               Cancelar
             </Button>
-            <Button onClick={handleAgregarDireccion}>
+            <Button onClick={handleAgregarDireccion} isLoading={isSaving}>
               Agregar
             </Button>
           </div>
@@ -191,7 +223,7 @@ const DireccionesPanel: React.FC = () => {
             <div
               key={direccion.id}
               className={`p-4 rounded-lg border-2 transition-all ${
-                direccion.esPredeterminada
+                direccion.isDefault
                   ? 'border-primary-500 bg-primary-50'
                   : 'border-gray-200 bg-white hover:border-gray-300'
               }`}
@@ -201,23 +233,28 @@ const DireccionesPanel: React.FC = () => {
                   <div className="flex items-center gap-2 mb-2">
                     <MapPinIcon size={20} className="text-gray-600" />
                     <h3 className="font-semibold text-gray-900">{direccion.alias}</h3>
-                    {direccion.esPredeterminada && (
-                      <span className="bg-primary-600 text-white text-xs px-2 py-1 rounded-full">
+                    {direccion.isDefault && (
+                      <span className="bg-primary-400 text-white text-xs px-2 py-1 rounded-full">
                         Predeterminada
                       </span>
                     )}
                   </div>
                   <p className="text-gray-700">
-                    {direccion.calle} {direccion.numero}
-                    {direccion.apartamento && `, Apto ${direccion.apartamento}`}
+                    {direccion.street} {direccion.number}
+                    {direccion.apartmentNumber && `, Apto ${direccion.apartmentNumber}`}
                   </p>
                   <p className="text-gray-600 text-sm">
-                    {direccion.ciudad}, {direccion.departamento} {direccion.codigoPostal}
+                    {direccion.city}, CP {direccion.zipCode}
                   </p>
+                  {direccion.additionalInfo && (
+                    <p className="text-gray-500 text-sm italic mt-1">
+                      {direccion.additionalInfo}
+                    </p>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
-                  {!direccion.esPredeterminada && (
+                  {!direccion.isDefault && (
                     <button
                       onClick={() => handleMarcarPredeterminada(direccion.id)}
                       className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"

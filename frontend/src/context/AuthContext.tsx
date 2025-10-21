@@ -9,6 +9,7 @@ type AuthContextType = {
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
+  updateUser: (userData: Partial<AuthState["user"]>) => void; // 👈 nuevo
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -107,8 +108,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateUser = (userData: Partial<AuthState["user"]>) => {
+  if (!userData) return; 
+  const previousEmail = state.user?.email;
+  const newEmail = userData.email;
+
+  setState((prev) => ({
+    ...prev,
+    user: { ...prev.user, ...userData },
+  }));
+
+  Object.entries(userData as Record<string, string | undefined>).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      localStorage.setItem(key, value);
+    }
+  });
+
+  // Si cambió el email del usuario, el subject del JWT deja de coincidir.
+  // Forzamos invalidación del token y re-login para obtener un JWT con el nuevo email.
+  if (newEmail && previousEmail && newEmail !== previousEmail) {
+    localStorage.removeItem('token');
+    // Opcional: limpiar otros campos sensibles si se desea
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
+  }
+};
+
   return (
-    <AuthContext.Provider value={{ state, login, register, logout }}>
+    <AuthContext.Provider value={{ state, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

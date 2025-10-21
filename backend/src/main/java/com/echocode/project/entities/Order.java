@@ -31,12 +31,8 @@ public class Order {
             inverseJoinColumns = @JoinColumn(name = "creationId"))
     private List<Creation> creations;
 
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    @JoinTable(
-//            name = "order_sides",
-//            joinColumns = @JoinColumn(name = "orderId"),
-//            inverseJoinColumns = @JoinColumn(name = "sideId"))
-//    private List<Sides> sides;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<OrderProduct> orderProducts;
 
     @NonNull
     @Temporal(TemporalType.TIMESTAMP)
