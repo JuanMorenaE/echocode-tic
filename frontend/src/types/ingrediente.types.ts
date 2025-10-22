@@ -1,8 +1,10 @@
+import { Category } from "./category.types";
+
 export interface Ingrediente {
   id: number;
   nombre: string;
-  categoria: CategoriaIngrediente;
-  tipoProducto: 'PIZZA' | 'HAMBURGUESA';
+  categoria?: Category;
+  tipoProducto: 'BURGER' | 'PIZZA';
   precio: number;
   cantidad: number; // Cuántas unidades incluye este ingrediente (ej: 1, 2 o 3 carnes)
   disponible?: boolean;

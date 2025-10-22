@@ -62,7 +62,7 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         </div>
 
         {/* Contenido scrolleable */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 rounded-b-3xl">
+        <div className="flex-1 overflow-y-auto px-6 py-4 rounded-b-3xl scroll-gutter">
           {children}
         </div>
       </div>

@@ -15,6 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex){
+        assert ex.getReason() != null;
         return ResponseEntity
                 .status(ex.getStatusCode())
                 .body(Map.of(

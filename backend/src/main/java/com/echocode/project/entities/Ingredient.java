@@ -1,5 +1,7 @@
 package com.echocode.project.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,14 +16,18 @@ public class Ingredient {
     private int ingredientId;
 
     @NonNull
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String ingredientName;
 
-    @NonNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private IngredientType ingredientType;
 
-    @NonNull
-    private String category;
+    @ManyToOne
+    @JsonBackReference
+    @JsonIgnoreProperties("ingredientes")
+    @JoinColumn(name = "categoryId")
+    private Category category;
 
     private double price;
 
