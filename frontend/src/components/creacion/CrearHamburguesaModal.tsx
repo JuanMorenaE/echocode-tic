@@ -7,6 +7,7 @@ import { CategoryAccordion } from './CategoryAccordion';
 import { Ingrediente } from '@/types/ingrediente.types';
 import { StarIcon } from '@/components/icons';
 import { Category } from '@/types/category.types';
+import { SpinnerGapIcon, SpinnerIcon } from '@phosphor-icons/react';
 
 interface CrearHamburguesaModalProps {
   isOpen: boolean;
@@ -21,39 +22,40 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   const [selectedAderezos, setSelectedAderezos] = useState<number[]>([]);
   const [selectedVegetales, setSelectedVegetales] = useState<number[]>([]);
   const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0)
+  const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (!isOpen) return;
   
-    console.log("Modal abierto, fetch de datos");
     async function fetchData() {
       try {
+        setLoading(true)
         const response = await fetch('http://localhost:8080/api/v1/categories');
         if (!response.ok) throw new Error('Error en la respuesta');
-        console.log(response)
         const data = await response.json();
 
-        console.log(data)
-
-        const category: Category = {
-          id: data[0].categoryId,
-          name: data[0].categoryName,
-          type: data[0].ingredientType,
-          ingredients: data[0].ingredients.map((i : any) => ({
-            id: i.ingredientId,
+        const list_categories = data.map((c : any) => ({
+          id: c.categoryId,
+          name: c.categoryName,
+          type: c.ingredientType,
+          ingredients: c.ingredients.map((i : any) => ({
+            ingredientId: i.ingredientId,
             nombre: i.ingredientName,
             tipoProducto: i.ingredientType,
             precio: i.price,
             cantidad: 1,
             disponible: i.enabled,
-          }))
-        }
+          })),
+          selected_ingredients: [],
+          multiple_select: false,
+        }))
 
-        setCategories([...categories, category])
-
-        console.log(category)
+        setCategories(list_categories)
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false)
       }
     }
   
@@ -88,45 +90,33 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   // const vegetales = ingredientes.filter(i => i.categoria === 'VEGETAL');
   // const extras = ingredientes.filter(i => i.categoria === 'EXTRA');
 
+
   const handleSelectPan = (id: number) => {
+    console.log(id)
     setSelectedPan([id]); // Solo uno
   };
 
-  const handleSelectCarne = (id: number) => {
-    setSelectedCarne([id]); // Solo una
-  };
-
-  const handleSelectAderezo = (id: number) => {
-    if (selectedAderezos.includes(id)) {
-      setSelectedAderezos(selectedAderezos.filter(i => i !== id));
-    } else {
-      setSelectedAderezos([...selectedAderezos, id]);
-    }
-  };
-
-  const handleSelectVegetal = (id: number) => {
-    if (selectedVegetales.includes(id)) {
-      setSelectedVegetales(selectedVegetales.filter(i => i !== id));
-    } else {
-      setSelectedVegetales([...selectedVegetales, id]);
-    }
-  };
-
-  const handleSelectExtra = (id: number) => {
-    if (selectedExtras.includes(id)) {
-      setSelectedExtras(selectedExtras.filter(i => i !== id));
-    } else {
-      setSelectedExtras([...selectedExtras, id]);
-    }
-  };
-
   const calcularPrecio = () => {
-    const allSelected = [...selectedPan, ...selectedCarne, ...selectedAderezos, ...selectedVegetales, ...selectedExtras];
-    return allSelected.reduce((total, id) => {
-      const ingrediente = ingredientes.find(i => i.id === id);
-      return total + (ingrediente?.precio || 0);
-    }, 0);
+    let total = 0
+
+    categories.forEach(c => {
+      c.selected_ingredients.forEach(selectedId => {
+        let selected = c.ingredients.find(i => i.ingredientId == selectedId)
+        total += selected?.precio ?? 0
+      })
+    })
+
+    setTotalPrice(total)
   };
+
+  const handleSelected = (category : Category, ingredient: Ingrediente) => {
+    // if (category.multiple_select && !category.selected_ingredients.includes(ingredient.ingredientId))
+    //   category.selected_ingredients.push(ingredient.ingredientId)
+    // else if (categort)
+    //   category.selected_ingredients = [ingredient.ingredientId]
+
+    // calcularPrecio()
+  }
 
   const handleAgregar = () => {
     // TODO: Agregar al carrito
@@ -168,67 +158,37 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
         </button>
       </div>
 
-      {/* Content scrollable */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-        {categories.map(c => (
-          <CategoryAccordion
-            key={c.id}
-            title={c.name}
-            ingredientes={c.ingredients}
-            selectedIds={selectedPan}
-            onSelect={handleSelectPan}
-            selectionType="single"
-            required
-          />
-        ))}
-        {/* <CategoryAccordion
-          title="Pan"
-          ingredientes={panes}
-          selectedIds={selectedPan}
-          onSelect={handleSelectPan}
-          selectionType="single"
-          required
-        />
+      {
+        loading && (
+          <div className='py-8 flex justify-center items-center text-center'>
+            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500'/>
+          </div>
+        )
+      }
 
-        <CategoryAccordion
-          title="Carne"
-          ingredientes={carnes}
-          selectedIds={selectedCarne}
-          onSelect={handleSelectCarne}
-          selectionType="single"
-          required
-        />
-
-        <CategoryAccordion
-          title="Aderezos"
-          ingredientes={aderezos}
-          selectedIds={selectedAderezos}
-          onSelect={handleSelectAderezo}
-          selectionType="multiple"
-        />
-
-        <CategoryAccordion
-          title="Vegetales"
-          ingredientes={vegetales}
-          selectedIds={selectedVegetales}
-          onSelect={handleSelectVegetal}
-          selectionType="multiple"
-        />
-
-        <CategoryAccordion
-          title="Extras"
-          ingredientes={extras}
-          selectedIds={selectedExtras}
-          onSelect={handleSelectExtra}
-          selectionType="multiple"
-        /> */}
-      </div>
+      {/* Content scrollable */
+        !loading && categories.length > 0 && (
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+            {categories.map(c => (
+              <CategoryAccordion
+                key={c.id}
+                title={c.name}
+                ingredientes={c.ingredients}
+                category={c}
+                onSelect={calcularPrecio}
+                selectionType="single"
+                required
+              />
+            ))}
+          </div>
+        )
+      }
 
       {/* Footer fijo */}
       <div className="px-6 py-4 bg-white border-t border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <span className="text-lg font-semibold text-gray-900">Total:</span>
-          <span className="text-2xl font-bold text-gray-900">${calcularPrecio()}</span>
+          <span className="text-2xl font-bold text-gray-900">${totalPrice}</span>
         </div>
 
         <div className="flex gap-3">

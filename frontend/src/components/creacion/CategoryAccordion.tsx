@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { CaretDownIcon } from '@/components/icons';
 import { Ingrediente } from '@/types/ingrediente.types';
+import { Category } from '@/types/category.types';
 
 interface CategoryAccordionProps {
   title: string;
   ingredientes: Ingrediente[];
-  selectedIds: number[];
-  onSelect: (id: number) => void;
+  category: Category,
+  onSelect: () => void;
   selectionType: 'single' | 'multiple'; // single = radio, multiple = checkbox
   required?: boolean;
 }
@@ -16,17 +17,31 @@ interface CategoryAccordionProps {
 export const CategoryAccordion = ({
   title,
   ingredientes,
-  selectedIds,
   onSelect,
+  category,
   selectionType,
   required = false,
 }: CategoryAccordionProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [selected, setSelected] = useState<number[]>([]);
 
-  const isSelected = (id: number) => selectedIds.includes(id);
+  const isSelected = (id: number) => category.selected_ingredients.includes(id);
+
+  const selectIngredient = (category: Category, ingredient: Ingrediente) => {
+    if(category.multiple_select && !selected.includes(ingredient.ingredientId)){
+      setSelected([...selected, ingredient.ingredientId])
+      category.selected_ingredients.push(ingredient.ingredientId)
+    }
+    else if(!category.multiple_select){
+      setSelected([ingredient.ingredientId])
+      category.selected_ingredients = [ingredient.ingredientId]
+    }
+
+    onSelect()
+  }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-gray-200 rounded-lg overflow-hidden" key={category.id}>
       {/* Header */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -35,9 +50,9 @@ export const CategoryAccordion = ({
         <div className="flex items-center gap-2">
           <h3 className="font-semibold text-gray-900">{title}</h3>
           {required && <span className="text-red-500 text-sm">*</span>}
-          {selectedIds.length > 0 && (
+          {category.selected_ingredients.length > 0 && (
             <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">
-              {selectedIds.length} seleccionado{selectedIds.length > 1 ? 's' : ''}
+              {category.selected_ingredients.length} seleccionado{category.selected_ingredients.length > 1 ? 's' : ''}
             </span>
           )}
         </div>
@@ -50,11 +65,11 @@ export const CategoryAccordion = ({
       {/* Content */}
       {isOpen && (
         <div className="p-4 bg-white space-y-2">
-          {ingredientes.map((ingrediente) => (
+          {ingredientes.map((ingrediente: Ingrediente) => (
             <label
-              key={ingrediente.id}
+              key={ingrediente.ingredientId}
               className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                isSelected(ingrediente.id)
+                isSelected(ingrediente.ingredientId)
                   ? 'border-gray-400 bg-gray-100'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
@@ -63,8 +78,8 @@ export const CategoryAccordion = ({
                 <input
                   type={selectionType === 'single' ? 'radio' : 'checkbox'}
                   name={selectionType === 'single' ? `category-${title}` : undefined}
-                  checked={isSelected(ingrediente.id)}
-                  onChange={() => onSelect(ingrediente.id)}
+                  checked={selected.includes(ingrediente.ingredientId)}
+                  onChange={() => selectIngredient(category, ingrediente)}
                   className="w-4 h-4 text-primary-600 focus:ring-primary-500"
                 />
                 <div className="flex-1">

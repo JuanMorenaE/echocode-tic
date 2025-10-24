@@ -1,7 +1,7 @@
 import { Category } from "./category.types";
 
 export interface Ingrediente {
-  id: number;
+  ingredientId: number;
   nombre: string;
   categoria?: Category;
   tipoProducto: 'BURGER' | 'PIZZA';
