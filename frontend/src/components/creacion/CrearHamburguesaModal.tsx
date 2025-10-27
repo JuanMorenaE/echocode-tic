@@ -31,27 +31,18 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
     async function fetchData() {
       try {
         setLoading(true)
-        const response = await fetch('http://localhost:8080/api/v1/categories');
+        const response = await fetch('http://localhost:8080/api/v1/ingredients/type', {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: 'POST',
+          body: JSON.stringify("BURGER")
+        });
+
         if (!response.ok) throw new Error('Error en la respuesta');
-        const data = await response.json();
-
-        const list_categories = data.map((c : any) => ({
-          id: c.categoryId,
-          name: c.categoryName,
-          type: c.ingredientType,
-          ingredients: c.ingredients.map((i : any) => ({
-            ingredientId: i.ingredientId,
-            nombre: i.ingredientName,
-            tipoProducto: i.ingredientType,
-            precio: i.price,
-            cantidad: 1,
-            disponible: i.enabled,
-          })),
-          selected_ingredients: [],
-          multiple_select: false,
-        }))
-
-        setCategories(list_categories)
+        const data: Ingrediente[] = await response.json();
+        
+        // setCategories(list_categories)
       } catch (error) {
         console.error(error);
       } finally {
@@ -84,39 +75,18 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   //   { id: 16, tipoProducto: 'HAMBURGUESA', nombre: 'Bacon', categoria: 'EXTRA', precio: 60, cantidad: 1 },
   // ]);
 
-  // const panes = ingredientes.filter(i => i.categoria === 'PAN');
-  // const carnes = ingredientes.filter(i => i.categoria === 'CARNE');
-  // const aderezos = ingredientes.filter(i => i.categoria === 'ADEREZO');
-  // const vegetales = ingredientes.filter(i => i.categoria === 'VEGETAL');
-  // const extras = ingredientes.filter(i => i.categoria === 'EXTRA');
-
-
-  const handleSelectPan = (id: number) => {
-    console.log(id)
-    setSelectedPan([id]); // Solo uno
-  };
-
   const calcularPrecio = () => {
     let total = 0
 
     categories.forEach(c => {
       c.selected_ingredients.forEach(selectedId => {
-        let selected = c.ingredients.find(i => i.ingredientId == selectedId)
-        total += selected?.precio ?? 0
+        let selected = c.ingredients.find(i => i.id == selectedId)
+        total += selected?.price ?? 0
       })
     })
 
     setTotalPrice(total)
   };
-
-  const handleSelected = (category : Category, ingredient: Ingrediente) => {
-    // if (category.multiple_select && !category.selected_ingredients.includes(ingredient.ingredientId))
-    //   category.selected_ingredients.push(ingredient.ingredientId)
-    // else if (categort)
-    //   category.selected_ingredients = [ingredient.ingredientId]
-
-    // calcularPrecio()
-  }
 
   const handleAgregar = () => {
     // TODO: Agregar al carrito
@@ -176,7 +146,7 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
                 ingredientes={c.ingredients}
                 category={c}
                 onSelect={calcularPrecio}
-                selectionType="single"
+                selectionType={c.multiple_select ? 'multiple' : 'single'}
                 required
               />
             ))}

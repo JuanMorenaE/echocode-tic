@@ -19,13 +19,13 @@ export default function IngredientesPage() {
     { id: 3, tipoProducto: 'PIZZA', nombre: 'Salsa de Tomate', categoria: 'SALSA', precio: 50, cantidad: 1 },
     { id: 4, tipoProducto: 'PIZZA', nombre: 'Mozzarella', categoria: 'QUESO', precio: 80, cantidad: 1 },
     { id: 5, tipoProducto: 'PIZZA', nombre: 'Pepperoni', categoria: 'TOPPING', precio: 120, cantidad: 1 },
-    { id: 6, tipoProducto: 'HAMBURGUESA', nombre: 'Pan de Papa', categoria: 'PAN', precio: 60, cantidad: 1 },
-    { id: 7, tipoProducto: 'HAMBURGUESA', nombre: 'Pan Integral', categoria: 'PAN', precio: 70, cantidad: 1 },
-    { id: 8, tipoProducto: 'HAMBURGUESA', nombre: 'Carne de Vaca', categoria: 'CARNE', precio: 200, cantidad: 1 },
-    { id: 9, tipoProducto: 'HAMBURGUESA', nombre: 'Doble Carne de Vaca', categoria: 'CARNE', precio: 350, cantidad: 2 },
-    { id: 10, tipoProducto: 'HAMBURGUESA', nombre: 'Triple Carne de Vaca', categoria: 'CARNE', precio: 450, cantidad: 3 },
-    { id: 11, tipoProducto: 'HAMBURGUESA', nombre: 'Salsa BBQ', categoria: 'ADEREZO', precio: 40, cantidad: 1 },
-    { id: 12, tipoProducto: 'HAMBURGUESA', nombre: 'Lechuga', categoria: 'VEGETAL', precio: 20, cantidad: 1 },
+    { id: 6, tipoProducto: 'BURGER', nombre: 'Pan de Papa', categoria: 'PAN', precio: 60, cantidad: 1 },
+    { id: 7, tipoProducto: 'BURGER', nombre: 'Pan Integral', categoria: 'PAN', precio: 70, cantidad: 1 },
+    { id: 8, tipoProducto: 'BURGER', nombre: 'Carne de Vaca', categoria: 'CARNE', precio: 200, cantidad: 1 },
+    { id: 9, tipoProducto: 'BURGER', nombre: 'Doble Carne de Vaca', categoria: 'CARNE', precio: 350, cantidad: 2 },
+    { id: 10, tipoProducto: 'BURGER', nombre: 'Triple Carne de Vaca', categoria: 'CARNE', precio: 450, cantidad: 3 },
+    { id: 11, tipoProducto: 'BURGER', nombre: 'Salsa BBQ', categoria: 'ADEREZO', precio: 40, cantidad: 1 },
+    { id: 12, tipoProducto: 'BURGER', nombre: 'Lechuga', categoria: 'VEGETAL', precio: 20, cantidad: 1 },
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,10 +37,28 @@ export default function IngredientesPage() {
   });
 
   const handleCreateIngrediente = (data: Partial<Ingrediente>) => {
+    console.log(data)
     const newIngrediente: Ingrediente = {
-      id: Math.max(...ingredientes.map(i => i.id), 0) + 1,
       ...data,
     } as Ingrediente;
+    
+    const fetchData = async () => {
+      console.log(JSON.stringify(newIngrediente))
+      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(newIngrediente)
+      });
+
+      const data = response.json()
+
+      console.log(data)
+    }
+
+    fetchData()
 
     setIngredientes([...ingredientes, newIngrediente]);
     setIsModalOpen(false);

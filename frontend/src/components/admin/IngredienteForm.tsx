@@ -14,11 +14,11 @@ interface IngredienteFormProps {
 
 export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: IngredienteFormProps) => {
   const [formData, setFormData] = useState({
-    tipoProducto: ingrediente?.tipoProducto || 'PIZZA',
-    nombre: ingrediente?.nombre || '',
-    categoria: ingrediente?.categoria || 'MASA',
-    precio: ingrediente?.precio?.toString() || '',
-    cantidad: ingrediente?.cantidad?.toString() || '1',
+    tipoProducto: ingrediente?.type || 'PIZZA',
+    nombre: ingrediente?.name || '',
+    categoria: ingrediente?.category || 'MASA',
+    precio: ingrediente?.price?.toString() || '',
+    cantidad: ingrediente?.quantity?.toString() || '1',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +37,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
   useEffect(() => {
     if (formData.tipoProducto === 'PIZZA' && !CATEGORIAS_PIZZA.find(c => c.value === formData.categoria)) {
       setFormData(prev => ({ ...prev, categoria: 'MASA' }));
-    } else if (formData.tipoProducto === 'HAMBURGUESA' && !CATEGORIAS_HAMBURGUESA.find(c => c.value === formData.categoria)) {
+    } else if (formData.tipoProducto === 'BURGER' && !CATEGORIAS_HAMBURGUESA.find(c => c.value === formData.categoria)) {
       setFormData(prev => ({ ...prev, categoria: 'PAN' }));
     }
   }, [formData.tipoProducto]);
@@ -71,12 +71,12 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
     try {
       // TODO: Conectar con backend
       const ingredienteData: Partial<Ingrediente> = {
-        tipoProducto: formData.tipoProducto as 'PIZZA' | 'HAMBURGUESA',
-        nombre: formData.nombre,
-        categoria: formData.categoria as any,
-        precio: Number(formData.precio),
-        cantidad: Number(formData.cantidad),
-        disponible: true,
+        type: formData.tipoProducto as 'PIZZA' | 'BURGER',
+        name: formData.nombre,
+        category: formData.categoria as any,
+        price: Number(formData.precio),
+        quantity: Number(formData.cantidad),
+        isEnabled: true,
       };
 
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
@@ -94,7 +94,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
         label="Tipo de Producto"
         options={tipoProductoOptions}
         value={formData.tipoProducto}
-        onChange={(e) => setFormData({ ...formData, tipoProducto: e.target.value as 'PIZZA' | 'HAMBURGUESA' })}
+        onChange={(e) => setFormData({ ...formData, tipoProducto: e.target.value as 'PIZZA' | 'BURGER' })}
         error={errors.tipoProducto}
       />
 
@@ -142,7 +142,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit" isLoading={isLoading}>
+        <Button type="submit" isLoading={isLoading} >
           {ingrediente ? 'Actualizar' : 'Crear'} Ingrediente
         </Button>
       </div>

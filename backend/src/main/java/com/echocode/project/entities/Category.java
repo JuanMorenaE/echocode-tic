@@ -1,5 +1,6 @@
 package com.echocode.project.entities;
 
+import com.echocode.project.enums.IngredientType;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;

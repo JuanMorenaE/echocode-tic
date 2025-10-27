@@ -28,13 +28,13 @@ export const CategoryAccordion = ({
   const isSelected = (id: number) => category.selected_ingredients.includes(id);
 
   const selectIngredient = (category: Category, ingredient: Ingrediente) => {
-    if(category.multiple_select && !selected.includes(ingredient.ingredientId)){
-      setSelected([...selected, ingredient.ingredientId])
-      category.selected_ingredients.push(ingredient.ingredientId)
+    if(category.multiple_select && !selected.includes(ingredient.id)){
+      setSelected([...selected, ingredient.id])
+      category.selected_ingredients.push(ingredient.id)
     }
     else if(!category.multiple_select){
-      setSelected([ingredient.ingredientId])
-      category.selected_ingredients = [ingredient.ingredientId]
+      setSelected([ingredient.id])
+      category.selected_ingredients = [ingredient.id]
     }
 
     onSelect()
@@ -67,9 +67,9 @@ export const CategoryAccordion = ({
         <div className="p-4 bg-white space-y-2">
           {ingredientes.map((ingrediente: Ingrediente) => (
             <label
-              key={ingrediente.ingredientId}
+              key={ingrediente.id}
               className={`flex items-center justify-between p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                isSelected(ingrediente.ingredientId)
+                isSelected(ingrediente.id)
                   ? 'border-gray-400 bg-gray-100'
                   : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
               }`}
@@ -78,7 +78,7 @@ export const CategoryAccordion = ({
                 <input
                   type={selectionType === 'single' ? 'radio' : 'checkbox'}
                   name={selectionType === 'single' ? `category-${title}` : undefined}
-                  checked={selected.includes(ingrediente.ingredientId)}
+                  checked={selected.includes(ingrediente.id)}
                   onChange={() => selectIngredient(category, ingrediente)}
                   className="w-4 h-4 text-primary-600 focus:ring-primary-500"
                 />
