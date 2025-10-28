@@ -29,6 +29,9 @@ public class Ingredient {
 
     private double price;
 
+    @Column(nullable = false)
+    private int quantity = 1;
+
     private boolean isEnabled;
 }
 

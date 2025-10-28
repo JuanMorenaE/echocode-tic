@@ -28,14 +28,31 @@ export const CategoryAccordion = ({
   const isSelected = (id: number) => category.selected_ingredients.includes(id);
 
   const selectIngredient = (category: Category, ingredient: Ingrediente) => {
-    if(category.multiple_select && !selected.includes(ingredient.id)){
-      setSelected([...selected, ingredient.id])
-      category.selected_ingredients.push(ingredient.id)
+    const isSelected = category.selected_ingredients.includes(ingredient.id);
+
+    let newSelected = [...selected];
+
+    if (isSelected){
+      newSelected = newSelected.filter(id => id != ingredient.id)
+      setSelected(newSelected)
+
+      category.selected_ingredients = category.selected_ingredients.filter(id => id !== ingredient.id);
+  
+      setSelected(newSelected);
+      onSelect();
+      return;
     }
-    else if(!category.multiple_select){
-      setSelected([ingredient.id])
-      category.selected_ingredients = [ingredient.id]
+
+    if(category.multiple_select){
+      if(!newSelected.includes(ingredient.id)){
+        newSelected.push(ingredient.id)
+        category.selected_ingredients.push(ingredient.id)
+      }
+    }else{
+      newSelected = [ingredient.id]
+      category.selected_ingredients = [ingredient.id]  
     }
+    setSelected(newSelected)
 
     onSelect()
   }

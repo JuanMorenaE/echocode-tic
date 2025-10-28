@@ -14,7 +14,7 @@ import { SpinnerGapIcon } from '@phosphor-icons/react';
 export default function IngredientesPage() {
   const { success, error } = useToast();
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,7 +40,7 @@ export default function IngredientesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIngrediente, setEditingIngrediente] = useState<Ingrediente | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterTipo, setFilterTipo] = useState<'ALL' | 'PIZZA' | 'HAMBURGUESA'>('ALL');
+  const [filterTipo, setFilterTipo] = useState<'ALL' | 'PIZZA' | 'BURGER'>('ALL');
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; ingrediente?: Ingrediente }>({
     isOpen: false,
   });
@@ -63,9 +63,9 @@ export default function IngredientesPage() {
           body: JSON.stringify(newIngrediente)
         });
   
-        const data = response.json()
+        const data: Ingrediente = await response.json()
   
-        console.log(data)
+        newIngrediente.id = data.id
       }catch(ex){
         console.error(ex)
       }
@@ -164,10 +164,10 @@ export default function IngredientesPage() {
             Pizza
           </button>
           <button
-            onClick={() => setFilterTipo('HAMBURGUESA')}
+            onClick={() => setFilterTipo('BURGER')}
             className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-              filterTipo === 'HAMBURGUESA'
-                ? 'bg-primary-600 text-white'
+              filterTipo === 'BURGER'
+                ? 'bg-primary-600 border-red-600 text-white'
                 : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
           >
@@ -184,12 +184,16 @@ export default function IngredientesPage() {
         )
       }
 
-      {/* Tabla de ingredientes */}
-      <IngredienteTable
-        ingredientes={filteredIngredientes}
-        onEdit={openEditModal}
-        onDelete={openDeleteConfirm}
-      />
+      {
+        !loading && (
+          <IngredienteTable
+            ingredientes={filteredIngredientes}
+            onEdit={openEditModal}
+            onDelete={openDeleteConfirm}
+          />
+        )
+      }
+      
 
       {/* Modal de crear/editar */}
       <Modal

@@ -25,7 +25,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
 
   const tipoProductoOptions = [
     { value: 'PIZZA', label: 'Pizza' },
-    { value: 'HAMBURGUESA', label: 'Hamburguesa' },
+    { value: 'BURGER', label: 'Hamburguesa' },
   ];
 
   // Actualizar categorías según el tipo de producto seleccionado

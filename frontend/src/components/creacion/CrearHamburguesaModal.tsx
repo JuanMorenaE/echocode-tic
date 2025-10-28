@@ -27,14 +27,15 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
 
   useEffect(() => {
     if (!isOpen) return;
+
+    setTotalPrice(0)
   
     async function fetchData() {
       try {
-        setLoading(true)
+        setLoading(true);
+
         const response = await fetch('http://localhost:8080/api/v1/ingredients/type', {
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           method: 'POST',
           body: JSON.stringify("BURGER")
         });
@@ -42,21 +43,30 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
         if (!response.ok) throw new Error('Error en la respuesta');
         const data: Ingrediente[] = await response.json();
 
-        const list_categories: Category[] = data.flatMap(i => i.category).map((category, index) => 
-        {
-          const category_item = CATEGORIAS_HAMBURGUESA.find(x => x.value == category)
+        const grouped = data.reduce((accumulator, ingredient) => {
+          if (!accumulator[ingredient.category]) 
+            accumulator[ingredient.category] = [];
+
+          accumulator[ingredient.category].push(ingredient);
+          return accumulator;
+        }, {} as Record<string, Ingrediente[]>);
+
+        console.log(grouped)
+        console.log(Object.entries(grouped))
+
+        const list_categories: Category[] = Object.entries(grouped).map(([category, ingredients], index) => {
+          const category_item = CATEGORIAS_HAMBURGUESA.find(x => x.value === category);
 
           return {
             id: index,
             name: category_item?.label ?? "",
-            type: 'BURGER',
-            ingredients: data.filter(i => i.category == category),
+            type: "BURGER",
+            ingredients,
             selected_ingredients: [],
             multiple_select: category_item?.multiple_select ?? false,
-          }
-        })
-
-        console.log(list_categories)
+            required: category_item?.required ?? false,
+          };
+        });
         
         setCategories(list_categories)
       } catch (error) {
@@ -163,9 +173,17 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
                 category={c}
                 onSelect={calcularPrecio}
                 selectionType={c.multiple_select ? 'multiple' : 'single'}
-                required
+                required={c.required}
               />
             ))}
+          </div>
+        )
+      }
+
+      {
+        !loading && categories.length == 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No hay ingredientes registrados.</p>
           </div>
         )
       }

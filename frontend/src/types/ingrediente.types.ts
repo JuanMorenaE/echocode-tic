@@ -19,16 +19,16 @@ export type CategoriaIngrediente =
   | 'CARNE'
   | 'ADEREZO';
 
-export const CATEGORIAS_PIZZA: { value: CategoriaIngrediente; label: string, multiple_select: boolean }[] = [
-  { value: 'MASA', label: 'Masa', multiple_select: false },
-  { value: 'SALSA', label: 'Salsa', multiple_select: false },
-  { value: 'QUESO', label: 'Queso', multiple_select: true },
-  { value: 'TOPPING', label: 'Topping', multiple_select: true },
+export const CATEGORIAS_PIZZA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean }[] = [
+  { value: 'MASA', label: 'Masa', multiple_select: false, required: true },
+  { value: 'SALSA', label: 'Salsa', multiple_select: false, required: true },
+  { value: 'QUESO', label: 'Queso', multiple_select: true, required: false },
+  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false },
 ];
 
-export const CATEGORIAS_HAMBURGUESA: { value: CategoriaIngrediente; label: string, multiple_select: boolean }[] = [
-  { value: 'PAN', label: 'Pan', multiple_select: false },
-  { value: 'CARNE', label: 'Carne', multiple_select: false },
-  { value: 'ADEREZO', label: 'Aderezo', multiple_select: true },
-  { value: 'TOPPING', label: 'Topping', multiple_select: true },
+export const CATEGORIAS_HAMBURGUESA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean }[] = [
+  { value: 'PAN', label: 'Pan', multiple_select: false, required: true },
+  { value: 'CARNE', label: 'Carne', multiple_select: false, required: true },
+  { value: 'ADEREZO', label: 'Aderezo', multiple_select: true, required: false },
+  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false },
 ];

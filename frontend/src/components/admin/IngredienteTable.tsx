@@ -54,8 +54,8 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {ingredientes.map((ingrediente) => {
-              return (
+            {ingredientes.map((ingrediente) => 
+              (
                 <tr key={ingrediente.id} className="hover:bg-gray-50 transition-colors">
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
@@ -67,7 +67,7 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
                   </td>
                   <td className="py-4 px-6">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoBadge(ingrediente.type)}`}>
-                      {ingrediente.type}
+                      {ingrediente.type == 'BURGER' ? 'HAMBURGUESA' : 'PIZZA'}
                     </span>
                   </td>
                   <td className="py-4 px-6">
@@ -102,8 +102,8 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
                     </div>
                   </td>
                 </tr>
-              );
-            })}
+              ) 
+            )}
           </tbody>
         </table>
       </div>
