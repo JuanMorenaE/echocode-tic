@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { IngredienteTable } from '@/components/admin/IngredienteTable';
 import { IngredienteForm } from '@/components/admin/IngredienteForm';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -9,24 +9,33 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Ingrediente } from '@/types/ingrediente.types';
 import { useToast } from '@/context/ToastContext';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 export default function IngredientesPage() {
   const { success, error } = useToast();
 
-  const [ingredientes, setIngredientes] = useState<Ingrediente[]>([
-    { id: 1, tipoProducto: 'PIZZA', nombre: 'Masa Napolitana', categoria: 'MASA', precio: 100, cantidad: 1 },
-    { id: 2, tipoProducto: 'PIZZA', nombre: 'Masa Integral', categoria: 'MASA', precio: 120, cantidad: 1 },
-    { id: 3, tipoProducto: 'PIZZA', nombre: 'Salsa de Tomate', categoria: 'SALSA', precio: 50, cantidad: 1 },
-    { id: 4, tipoProducto: 'PIZZA', nombre: 'Mozzarella', categoria: 'QUESO', precio: 80, cantidad: 1 },
-    { id: 5, tipoProducto: 'PIZZA', nombre: 'Pepperoni', categoria: 'TOPPING', precio: 120, cantidad: 1 },
-    { id: 6, tipoProducto: 'BURGER', nombre: 'Pan de Papa', categoria: 'PAN', precio: 60, cantidad: 1 },
-    { id: 7, tipoProducto: 'BURGER', nombre: 'Pan Integral', categoria: 'PAN', precio: 70, cantidad: 1 },
-    { id: 8, tipoProducto: 'BURGER', nombre: 'Carne de Vaca', categoria: 'CARNE', precio: 200, cantidad: 1 },
-    { id: 9, tipoProducto: 'BURGER', nombre: 'Doble Carne de Vaca', categoria: 'CARNE', precio: 350, cantidad: 2 },
-    { id: 10, tipoProducto: 'BURGER', nombre: 'Triple Carne de Vaca', categoria: 'CARNE', precio: 450, cantidad: 3 },
-    { id: 11, tipoProducto: 'BURGER', nombre: 'Salsa BBQ', categoria: 'ADEREZO', precio: 40, cantidad: 1 },
-    { id: 12, tipoProducto: 'BURGER', nombre: 'Lechuga', categoria: 'VEGETAL', precio: 20, cantidad: 1 },
-  ]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        setLoading(true)
+        const response = await fetch('http://localhost:8080/api/v1/ingredients');
+        const data: Ingrediente[] = await response.json()
+  
+        console.log(data)
+        setIngredientes(data)
+      }catch(ex){
+        console.error(ex)
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const [ingredientes, setIngredientes] = useState<Ingrediente[]>([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIngrediente, setEditingIngrediente] = useState<Ingrediente | undefined>();
@@ -43,26 +52,31 @@ export default function IngredientesPage() {
     } as Ingrediente;
     
     const fetchData = async () => {
-      console.log(JSON.stringify(newIngrediente))
-      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(newIngrediente)
-      });
-
-      const data = response.json()
-
-      console.log(data)
+      try{
+        console.log(JSON.stringify(newIngrediente))
+        const response = await fetch('http://localhost:8080/api/v1/ingredients', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: 'POST',
+          body: JSON.stringify(newIngrediente)
+        });
+  
+        const data = response.json()
+  
+        console.log(data)
+      }catch(ex){
+        console.error(ex)
+      }
+      
     }
 
     fetchData()
 
     setIngredientes([...ingredientes, newIngrediente]);
     setIsModalOpen(false);
-    success(`Ingrediente "${data.nombre}" creado exitosamente`);
+    success(`Ingrediente "${data.name}" creado exitosamente`);
   };
 
   const handleEditIngrediente = (data: Partial<Ingrediente>) => {
@@ -71,7 +85,7 @@ export default function IngredientesPage() {
     ));
     setIsModalOpen(false);
     setEditingIngrediente(undefined);
-    success(`Ingrediente "${data.nombre}" actualizado exitosamente`);
+    success(`Ingrediente "${data.name}" actualizado exitosamente`);
   };
 
   const openDeleteConfirm = (ingrediente: Ingrediente) => {
@@ -81,7 +95,7 @@ export default function IngredientesPage() {
   const handleDeleteIngrediente = () => {
     if (deleteConfirm.ingrediente) {
       setIngredientes(ingredientes.filter(i => i.id !== deleteConfirm.ingrediente!.id));
-      success(`Ingrediente "${deleteConfirm.ingrediente.nombre}" eliminado exitosamente`);
+      success(`Ingrediente "${deleteConfirm.ingrediente.name}" eliminado exitosamente`);
       setDeleteConfirm({ isOpen: false });
     }
   };
@@ -97,9 +111,9 @@ export default function IngredientesPage() {
   };
 
   const filteredIngredientes = ingredientes.filter(i => {
-    const matchesSearch = i.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          i.categoria.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTipo = filterTipo === 'ALL' || i.tipoProducto === filterTipo;
+    const matchesSearch = i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          i.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTipo = filterTipo === 'ALL' || i.type === filterTipo;
     return matchesSearch && matchesTipo;
   });
 
@@ -162,6 +176,14 @@ export default function IngredientesPage() {
         </div>
       </div>
 
+      {
+        loading && (
+          <div className='py-8 flex justify-center items-center text-center'>
+            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500'/>
+          </div>
+        )
+      }
+
       {/* Tabla de ingredientes */}
       <IngredienteTable
         ingredientes={filteredIngredientes}
@@ -189,7 +211,7 @@ export default function IngredientesPage() {
         onClose={() => setDeleteConfirm({ isOpen: false })}
         onConfirm={handleDeleteIngrediente}
         title="¿Eliminar ingrediente?"
-        message={`Estás a punto de eliminar "${deleteConfirm.ingrediente?.nombre}". Esta acción no se puede deshacer.`}
+        message={`Estás a punto de eliminar "${deleteConfirm.ingrediente?.name}". Esta acción no se puede deshacer.`}
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
         type="danger"

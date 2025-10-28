@@ -13,7 +13,7 @@ interface IngredienteTableProps {
 export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: IngredienteTableProps) => {
   const getTipoIcon = (tipo: string) => {
     if (tipo === 'PIZZA') return <PizzaIcon size={24} weight="fill" className="text-primary-600" />;
-    if (tipo === 'HAMBURGUESA') return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
+    if (tipo === 'BURGER') return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
     return '🍴';
   };
 
@@ -60,26 +60,26 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
                   <td className="py-4 px-6">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
-                        {getTipoIcon(ingrediente.tipoProducto)}
+                        {getTipoIcon(ingrediente.type)}
                       </div>
-                      <span className="font-medium text-gray-900">{ingrediente.nombre}</span>
+                      <span className="font-medium text-gray-900">{ingrediente.name}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoBadge(ingrediente.tipoProducto)}`}>
-                      {ingrediente.tipoProducto}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoBadge(ingrediente.type)}`}>
+                      {ingrediente.type}
                     </span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCategoriaBadge(ingrediente.categoria)}`}>
-                      {ingrediente.categoria}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCategoriaBadge(ingrediente.category)}`}>
+                      {ingrediente.category}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-center font-medium text-gray-900">
-                    x{ingrediente.cantidad}
+                    x{ingrediente.quantity}
                   </td>
                   <td className="py-4 px-6 text-right font-semibold text-gray-900">
-                    ${ingrediente.precio}
+                    ${ingrediente.price}
                   </td>
                   <td className="py-4 px-6">
                     <div className="flex items-center justify-center gap-2">

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { CategoryAccordion } from './CategoryAccordion';
-import { Ingrediente } from '@/types/ingrediente.types';
+import { CATEGORIAS_HAMBURGUESA, Ingrediente } from '@/types/ingrediente.types';
 import { StarIcon } from '@/components/icons';
 import { Category } from '@/types/category.types';
 import { SpinnerGapIcon, SpinnerIcon } from '@phosphor-icons/react';
@@ -41,8 +41,24 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
 
         if (!response.ok) throw new Error('Error en la respuesta');
         const data: Ingrediente[] = await response.json();
+
+        const list_categories: Category[] = data.flatMap(i => i.category).map((category, index) => 
+        {
+          const category_item = CATEGORIAS_HAMBURGUESA.find(x => x.value == category)
+
+          return {
+            id: index,
+            name: category_item?.label ?? "",
+            type: 'BURGER',
+            ingredients: data.filter(i => i.category == category),
+            selected_ingredients: [],
+            multiple_select: category_item?.multiple_select ?? false,
+          }
+        })
+
+        console.log(list_categories)
         
-        // setCategories(list_categories)
+        setCategories(list_categories)
       } catch (error) {
         console.error(error);
       } finally {

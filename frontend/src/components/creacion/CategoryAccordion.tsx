@@ -84,16 +84,16 @@ export const CategoryAccordion = ({
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-900">{ingrediente.nombre}</span>
-                    {ingrediente.cantidad > 1 && (
+                    <span className="font-medium text-gray-900">{ingrediente.name}</span>
+                    {ingrediente.quantity > 1 && (
                       <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                        x{ingrediente.cantidad}
+                        x{ingrediente.quantity}
                       </span>
                     )}
                   </div>
                 </div>
               </div>
-              <span className="font-semibold text-gray-900">${ingrediente.precio}</span>
+              <span className="font-semibold text-gray-900">${ingrediente.price}</span>
             </label>
           ))}
 
