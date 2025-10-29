@@ -17,13 +17,9 @@ interface CrearHamburguesaModalProps {
 export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModalProps) => {
   const [nombre, setNombre] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedPan, setSelectedPan] = useState<number[]>([]);
-  const [selectedCarne, setSelectedCarne] = useState<number[]>([]);
-  const [selectedAderezos, setSelectedAderezos] = useState<number[]>([]);
-  const [selectedVegetales, setSelectedVegetales] = useState<number[]>([]);
-  const [selectedExtras, setSelectedExtras] = useState<number[]>([]);
-  const [totalPrice, setTotalPrice] = useState<number>(0)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -61,12 +57,15 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
             id: index,
             name: category_item?.label ?? "",
             type: "BURGER",
-            ingredients,
+            ingredients: ingredients.sort((a, b) => a.name.localeCompare(b.name)),
             selected_ingredients: [],
             multiple_select: category_item?.multiple_select ?? false,
             required: category_item?.required ?? false,
+            order: category_item?.order ?? -1,
           };
         });
+
+        list_categories.sort((a, b) => a.order - b.order)
         
         setCategories(list_categories)
       } catch (error) {
@@ -78,8 +77,6 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   
     fetchData();
   }, [isOpen]);
-
-  const [categories, setCategories] = useState<Category[]>([])
 
   // TODO: Obtener ingredientes del backend
   const [ingredientes, setIngredientes] = useState<Ingrediente[]>([])
@@ -114,17 +111,25 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
     setTotalPrice(total)
   };
 
+  const requiredCompleted = () => {
+    if(categories.length == 0)
+      return false
+
+    const required_categories = categories.filter(c => c.required);
+    return required_categories.every(c => c.selected_ingredients.length > 0);
+  }
+
   const handleAgregar = () => {
     // TODO: Agregar al carrito
-    console.log('Hamburguesa creada:', {
-      nombre,
-      pan: selectedPan,
-      carne: selectedCarne,
-      aderezos: selectedAderezos,
-      vegetales: selectedVegetales,
-      extras: selectedExtras,
-      precio: calcularPrecio(),
-    });
+    // console.log('Hamburguesa creada:', {
+    //   nombre,
+    //   pan: selectedPan,
+    //   carne: selectedCarne,
+    //   aderezos: selectedAderezos,
+    //   vegetales: selectedVegetales,
+    //   extras: selectedExtras,
+    //   precio: calcularPrecio(),
+    // });
     onClose();
   };
 
@@ -165,15 +170,15 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
       {/* Content scrollable */
         !loading && categories.length > 0 && (
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-            {categories.map(c => (
+            {categories.map(category => (
               <CategoryAccordion
-                key={c.id}
-                title={c.name}
-                ingredientes={c.ingredients}
-                category={c}
+                key={category.id}
+                title={category.name}
+                ingredientes={category.ingredients}
+                category={category}
                 onSelect={calcularPrecio}
-                selectionType={c.multiple_select ? 'multiple' : 'single'}
-                required={c.required}
+                selectionType={category.multiple_select ? 'multiple' : 'single'}
+                required={category.required}
               />
             ))}
           </div>
@@ -206,7 +211,7 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
           <Button
             onClick={handleAgregar}
             className="flex-1"
-            disabled={selectedPan.length === 0 || selectedCarne.length === 0}
+            disabled={!requiredCompleted()}
           >
             Agregar al Carrito
           </Button>

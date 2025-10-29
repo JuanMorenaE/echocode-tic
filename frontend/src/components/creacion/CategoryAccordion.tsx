@@ -116,7 +116,7 @@ export const CategoryAccordion = ({
 
           {ingredientes.length === 0 && (
             <p className="text-center text-gray-500 py-4">
-              No hay ingredientes disponibles
+              No hay ingredientes disponibles.
             </p>
           )}
         </div>

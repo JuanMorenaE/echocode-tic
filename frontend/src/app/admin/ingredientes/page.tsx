@@ -27,6 +27,7 @@ export default function IngredientesPage() {
         setIngredientes(data)
       }catch(ex){
         console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
       }finally{
         setLoading(false)
       }
@@ -69,6 +70,7 @@ export default function IngredientesPage() {
       success(`Ingrediente "${created.name}" creado exitosamente`);
     }catch(ex){
       console.error(ex)
+      error("Ocurrio un error inesperado, contacta a un administrador.")
     }
   };
 
@@ -98,6 +100,7 @@ export default function IngredientesPage() {
       success(`Ingrediente "${updated.name}" actualizado exitosamente`);
     }catch(ex){
       console.error(ex)
+      error("Ocurrio un error inesperado, contacta a un administrador.")
     }
   };
 

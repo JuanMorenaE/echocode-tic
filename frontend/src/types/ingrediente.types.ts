@@ -1,5 +1,5 @@
 export interface Ingrediente {
-  id?: number;
+  id: number;
   name: string;
   category: CategoriaIngrediente;
   type: 'BURGER' | 'PIZZA';
@@ -19,16 +19,16 @@ export type CategoriaIngrediente =
   | 'CARNE'
   | 'ADEREZO';
 
-export const CATEGORIAS_PIZZA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean }[] = [
-  { value: 'MASA', label: 'Masa', multiple_select: false, required: true },
-  { value: 'SALSA', label: 'Salsa', multiple_select: false, required: true },
-  { value: 'QUESO', label: 'Queso', multiple_select: true, required: false },
-  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false },
+export const CATEGORIAS_PIZZA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean, order: number }[] = [
+  { value: 'MASA', label: 'Masa', multiple_select: false, required: true, order: 1 },
+  { value: 'SALSA', label: 'Salsa', multiple_select: false, required: true, order: 2 },
+  { value: 'QUESO', label: 'Queso', multiple_select: true, required: false, order: 3 },
+  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false, order: 4 },
 ];
 
-export const CATEGORIAS_HAMBURGUESA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean }[] = [
-  { value: 'PAN', label: 'Pan', multiple_select: false, required: true },
-  { value: 'CARNE', label: 'Carne', multiple_select: false, required: true },
-  { value: 'ADEREZO', label: 'Aderezo', multiple_select: true, required: false },
-  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false },
+export const CATEGORIAS_HAMBURGUESA: { value: CategoriaIngrediente; label: string, multiple_select: boolean, required: boolean, order: number }[] = [
+  { value: 'PAN', label: 'Pan', multiple_select: false, required: true, order: 1 },
+  { value: 'CARNE', label: 'Carne', multiple_select: false, required: true, order: 2 },
+  { value: 'ADEREZO', label: 'Aderezo', multiple_select: true, required: false, order: 3 },
+  { value: 'TOPPING', label: 'Topping', multiple_select: true, required: false, order: 4 },
 ];

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { CategoryAccordion } from './CategoryAccordion';
-import { Ingrediente } from '@/types/ingrediente.types';
+import { CATEGORIAS_PIZZA, Ingrediente } from '@/types/ingrediente.types';
 import { StarIcon } from '@/components/icons';
+import { Category } from '@/types/category.types';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 interface CrearPizzaModalProps {
   isOpen: boolean;
@@ -15,73 +17,98 @@ interface CrearPizzaModalProps {
 export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
   const [nombre, setNombre] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
-  const [selectedMasa, setSelectedMasa] = useState<number[]>([]);
-  const [selectedSalsa, setSelectedSalsa] = useState<number[]>([]);
-  const [selectedQueso, setSelectedQueso] = useState<number[]>([]);
-  const [selectedToppings, setSelectedToppings] = useState<number[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  // TODO: Obtener ingredientes del backend
-  const [ingredientes, setIngredientes] = useState<Ingrediente[]>([
-    { id: 1, tipoProducto: 'PIZZA', nombre: 'Masa Napolitana', categoria: 'MASA', precio: 100, cantidad: 1 },
-    { id: 2, tipoProducto: 'PIZZA', nombre: 'Masa Integral', categoria: 'MASA', precio: 120, cantidad: 1 },
-    { id: 3, tipoProducto: 'PIZZA', nombre: 'Masa Sin Gluten', categoria: 'MASA', precio: 150, cantidad: 1 },
-    { id: 4, tipoProducto: 'PIZZA', nombre: 'Salsa de Tomate', categoria: 'SALSA', precio: 50, cantidad: 1 },
-    { id: 5, tipoProducto: 'PIZZA', nombre: 'Salsa Pomodoro', categoria: 'SALSA', precio: 60, cantidad: 1 },
-    { id: 6, tipoProducto: 'PIZZA', nombre: 'Salsa Blanca', categoria: 'SALSA', precio: 70, cantidad: 1 },
-    { id: 7, tipoProducto: 'PIZZA', nombre: 'Mozzarella', categoria: 'QUESO', precio: 80, cantidad: 1 },
-    { id: 8, tipoProducto: 'PIZZA', nombre: 'Roquefort', categoria: 'QUESO', precio: 100, cantidad: 1 },
-    { id: 9, tipoProducto: 'PIZZA', nombre: 'Parmesano', categoria: 'QUESO', precio: 90, cantidad: 1 },
-    { id: 10, tipoProducto: 'PIZZA', nombre: 'Pepperoni', categoria: 'TOPPING', precio: 120, cantidad: 1 },
-    { id: 11, tipoProducto: 'PIZZA', nombre: 'Jamón', categoria: 'TOPPING', precio: 100, cantidad: 1 },
-    { id: 12, tipoProducto: 'PIZZA', nombre: 'Champiñones', categoria: 'TOPPING', precio: 80, cantidad: 1 },
-    { id: 13, tipoProducto: 'PIZZA', nombre: 'Aceitunas', categoria: 'TOPPING', precio: 70, cantidad: 1 },
-    { id: 14, tipoProducto: 'PIZZA', nombre: 'Pimientos', categoria: 'TOPPING', precio: 60, cantidad: 1 },
-    { id: 15, tipoProducto: 'PIZZA', nombre: 'Cebolla', categoria: 'TOPPING', precio: 50, cantidad: 1 },
-  ]);
+  useEffect(() => {
+    if (!isOpen) return;
 
-  const masas = ingredientes.filter(i => i.categoria === 'MASA');
-  const salsas = ingredientes.filter(i => i.categoria === 'SALSA');
-  const quesos = ingredientes.filter(i => i.categoria === 'QUESO');
-  const toppings = ingredientes.filter(i => i.categoria === 'TOPPING');
+    setTotalPrice(0)
+  
+    async function fetchData() {
+      try {
+        setLoading(true);
 
-  const handleSelectMasa = (id: number) => {
-    setSelectedMasa([id]); // Solo una
-  };
+        const response = await fetch('http://localhost:8080/api/v1/ingredients/type', {
+          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          body: JSON.stringify("PIZZA")
+        });
 
-  const handleSelectSalsa = (id: number) => {
-    setSelectedSalsa([id]); // Solo una
-  };
+        if (!response.ok) throw new Error('Error en la respuesta');
+        const data: Ingrediente[] = await response.json();
 
-  const handleSelectQueso = (id: number) => {
-    setSelectedQueso([id]); // Solo uno
-  };
+        const grouped = data.reduce((accumulator, ingredient) => {
+          if (!accumulator[ingredient.category]) 
+            accumulator[ingredient.category] = [];
 
-  const handleSelectTopping = (id: number) => {
-    if (selectedToppings.includes(id)) {
-      setSelectedToppings(selectedToppings.filter(i => i !== id));
-    } else {
-      setSelectedToppings([...selectedToppings, id]);
+          accumulator[ingredient.category].push(ingredient);
+          return accumulator;
+        }, {} as Record<string, Ingrediente[]>);
+
+        console.log(grouped)
+        console.log(Object.entries(grouped))
+
+        const list_categories: Category[] = Object.entries(grouped).map(([category, ingredients], index) => {
+          const category_item = CATEGORIAS_PIZZA.find(x => x.value === category);
+
+          return {
+            id: index,
+            name: category_item?.label ?? "",
+            type: "PIZZA",
+            ingredients: ingredients.sort((a, b) => a.name.localeCompare(b.name)),
+            selected_ingredients: [],
+            multiple_select: category_item?.multiple_select ?? false,
+            required: category_item?.required ?? false,
+            order: category_item?.order ?? -1,
+          };
+        });
+
+        list_categories.sort((a, b) => a.order - b.order)
+        
+        setCategories(list_categories)
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false)
+      }
     }
-  };
+  
+    fetchData();
+  }, [isOpen]);
 
   const calcularPrecio = () => {
-    const allSelected = [...selectedMasa, ...selectedSalsa, ...selectedQueso, ...selectedToppings];
-    return allSelected.reduce((total, id) => {
-      const ingrediente = ingredientes.find(i => i.id === id);
-      return total + (ingrediente?.precio || 0);
-    }, 0);
+    let total = 0
+
+    categories.forEach(c => {
+      c.selected_ingredients.forEach(selectedId => {
+        let selected = c.ingredients.find(i => i.id == selectedId)
+        total += selected?.price ?? 0
+      })
+    })
+
+    setTotalPrice(total)
   };
+
+  const requiredCompleted = () => {
+    if(categories.length == 0)
+      return false
+
+    const required_categories = categories.filter(c => c.required);
+    return required_categories.every(c => c.selected_ingredients.length > 0);
+  }
 
   const handleAgregar = () => {
     // TODO: Agregar al carrito
-    console.log('Pizza creada:', {
-      nombre,
-      masa: selectedMasa,
-      salsa: selectedSalsa,
-      queso: selectedQueso,
-      toppings: selectedToppings,
-      precio: calcularPrecio(),
-    });
+    // console.log('Pizza creada:', {
+    //   nombre,
+    //   masa: selectedMasa,
+    //   salsa: selectedSalsa,
+    //   queso: selectedQueso,
+    //   toppings: selectedToppings,
+    //   precio: calcularPrecio(),
+    // });
     onClose();
   };
 
@@ -111,49 +138,47 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
         </button>
       </div>
 
-      {/* Content scrollable */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-        <CategoryAccordion
-          title="Masa"
-          ingredientes={masas}
-          selectedIds={selectedMasa}
-          onSelect={handleSelectMasa}
-          selectionType="single"
-          required
-        />
+      {
+        loading && (
+          <div className='py-8 flex justify-center items-center text-center'>
+            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500'/>
+          </div>
+        )
+      }
 
-        <CategoryAccordion
-          title="Salsa"
-          ingredientes={salsas}
-          selectedIds={selectedSalsa}
-          onSelect={handleSelectSalsa}
-          selectionType="single"
-          required
-        />
+      {/* Content scrollable */
+        !loading && categories.length > 0 && (
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+            {
+              categories.map(category => (
+                <CategoryAccordion
+                  key={category.id}
+                  title={category.name}
+                  ingredientes={category.ingredients}
+                  category={category}
+                  onSelect={calcularPrecio}
+                  selectionType={category.multiple_select ? 'multiple' : 'single'}
+                  required={category.required}
+                />
+              ))
+            }
+          </div>
+        )
+      }
 
-        <CategoryAccordion
-          title="Queso"
-          ingredientes={quesos}
-          selectedIds={selectedQueso}
-          onSelect={handleSelectQueso}
-          selectionType="single"
-          required
-        />
-
-        <CategoryAccordion
-          title="Toppings"
-          ingredientes={toppings}
-          selectedIds={selectedToppings}
-          onSelect={handleSelectTopping}
-          selectionType="multiple"
-        />
-      </div>
+      {
+        !loading && categories.length == 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No hay ingredientes registrados.</p>
+          </div>
+        )
+      }
 
       {/* Footer fijo */}
       <div className="px-6 py-4 bg-white border-t border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <span className="text-lg font-semibold text-gray-900">Total:</span>
-          <span className="text-2xl font-bold text-gray-900">${calcularPrecio()}</span>
+          <span className="text-2xl font-bold text-gray-900">${totalPrice}</span>
         </div>
 
         <div className="flex gap-3">
@@ -167,7 +192,7 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
           <Button
             onClick={handleAgregar}
             className="flex-1"
-            disabled={selectedMasa.length === 0 || selectedSalsa.length === 0 || selectedQueso.length === 0}
+            disabled={!requiredCompleted()}
           >
             Agregar al Carrito
           </Button>
