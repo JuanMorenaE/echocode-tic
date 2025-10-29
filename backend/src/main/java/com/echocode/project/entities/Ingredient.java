@@ -14,7 +14,7 @@ import lombok.*;
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private long id;
 
     @Column(length = 20, nullable = false)
     private String name;

@@ -45,47 +45,60 @@ export default function IngredientesPage() {
     isOpen: false,
   });
 
-  const handleCreateIngrediente = (data: Partial<Ingrediente>) => {
-    console.log(data)
-    const newIngrediente: Ingrediente = {
-      ...data,
-    } as Ingrediente;
+  const handleCreateIngrediente = async (data: Ingrediente) => {
+    const { id, ...newIngrediente} = data;
     
-    const fetchData = async () => {
-      try{
-        console.log(JSON.stringify(newIngrediente))
-        const response = await fetch('http://localhost:8080/api/v1/ingredients', {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-          },
-          method: 'POST',
-          body: JSON.stringify(newIngrediente)
-        });
-  
-        const data: Ingrediente = await response.json()
-  
-        newIngrediente.id = data.id
-      }catch(ex){
-        console.error(ex)
+    try{
+      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(newIngrediente)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la creación del ingrediente (${response.status})`);
       }
-      
+
+      const created = await response.json();
+
+      setIngredientes([...ingredientes, created]);
+      setIsModalOpen(false);
+      success(`Ingrediente "${created.name}" creado exitosamente`);
+    }catch(ex){
+      console.error(ex)
     }
-
-    fetchData()
-
-    setIngredientes([...ingredientes, newIngrediente]);
-    setIsModalOpen(false);
-    success(`Ingrediente "${data.name}" creado exitosamente`);
   };
 
-  const handleEditIngrediente = (data: Partial<Ingrediente>) => {
-    setIngredientes(ingredientes.map(i =>
-      i.id === editingIngrediente?.id ? { ...i, ...data } : i
-    ));
-    setIsModalOpen(false);
-    setEditingIngrediente(undefined);
-    success(`Ingrediente "${data.name}" actualizado exitosamente`);
+  const handleEditIngrediente = async (data: Ingrediente) => {
+    try{
+      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al actualizar ingrediente (${response.status})`);
+      }
+
+      const updated = await response.json();
+
+      setIngredientes((prev) =>
+        prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+      );
+  
+      setIsModalOpen(false);
+      setEditingIngrediente(undefined);
+      success(`Ingrediente "${updated.name}" actualizado exitosamente`);
+    }catch(ex){
+      console.error(ex)
+    }
   };
 
   const openDeleteConfirm = (ingrediente: Ingrediente) => {

@@ -37,4 +37,10 @@ public class IngredientController {
         Ingredient createdIngredient = ingredientService.create(ingredient);
         return ResponseEntity.ok(createdIngredient);
     }
+
+    @PutMapping
+    public ResponseEntity<Ingredient> update(@RequestBody Ingredient ingredient) {
+        Ingredient updatedIngredient = ingredientService.update(ingredient);
+        return ResponseEntity.ok(updatedIngredient);
+    }
 }

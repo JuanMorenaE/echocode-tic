@@ -8,7 +8,7 @@ import { Ingrediente, CategoriaIngrediente, CATEGORIAS_PIZZA, CATEGORIAS_HAMBURG
 
 interface IngredienteFormProps {
   ingrediente?: Ingrediente;
-  onSubmit: (data: Partial<Ingrediente>) => void;
+  onSubmit: (data: Ingrediente) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -70,7 +70,8 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
 
     try {
       // TODO: Conectar con backend
-      const ingredienteData: Partial<Ingrediente> = {
+      const ingredienteData: Ingrediente = {
+        id: ingrediente?.id ?? -1,
         type: formData.tipoProducto as 'PIZZA' | 'BURGER',
         name: formData.nombre,
         category: formData.categoria as any,
@@ -79,8 +80,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
         isEnabled: true,
       };
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulación
-      onSubmit(ingredienteData);
+      await onSubmit(ingredienteData);
     } catch (error) {
       setErrors({ submit: 'Error al guardar el ingrediente' });
     } finally {

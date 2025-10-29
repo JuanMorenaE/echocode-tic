@@ -1,5 +1,5 @@
 export interface Ingrediente {
-  id: number;
+  id?: number;
   name: string;
   category: CategoriaIngrediente;
   type: 'BURGER' | 'PIZZA';
