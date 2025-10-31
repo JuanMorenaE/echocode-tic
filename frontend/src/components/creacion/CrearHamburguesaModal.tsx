@@ -47,9 +47,6 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
           return accumulator;
         }, {} as Record<string, Ingrediente[]>);
 
-        console.log(grouped)
-        console.log(Object.entries(grouped))
-
         const list_categories: Category[] = Object.entries(grouped).map(([category, ingredients], index) => {
           const category_item = CATEGORIAS_HAMBURGUESA.find(x => x.value === category);
 
@@ -121,15 +118,9 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
 
   const handleAgregar = () => {
     // TODO: Agregar al carrito
-    // console.log('Hamburguesa creada:', {
-    //   nombre,
-    //   pan: selectedPan,
-    //   carne: selectedCarne,
-    //   aderezos: selectedAderezos,
-    //   vegetales: selectedVegetales,
-    //   extras: selectedExtras,
-    //   precio: calcularPrecio(),
-    // });
+    const selected_ingredients = categories.flatMap(i => i.selected_ingredients);
+    console.log(selected_ingredients);
+
     onClose();
   };
 

@@ -47,9 +47,6 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
           return accumulator;
         }, {} as Record<string, Ingrediente[]>);
 
-        console.log(grouped)
-        console.log(Object.entries(grouped))
-
         const list_categories: Category[] = Object.entries(grouped).map(([category, ingredients], index) => {
           const category_item = CATEGORIAS_PIZZA.find(x => x.value === category);
 
@@ -101,14 +98,9 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
 
   const handleAgregar = () => {
     // TODO: Agregar al carrito
-    // console.log('Pizza creada:', {
-    //   nombre,
-    //   masa: selectedMasa,
-    //   salsa: selectedSalsa,
-    //   queso: selectedQueso,
-    //   toppings: selectedToppings,
-    //   precio: calcularPrecio(),
-    // });
+    const selected_ingredients = categories.flatMap(i => i.selected_ingredients);
+    console.log(selected_ingredients);
+    
     onClose();
   };
 

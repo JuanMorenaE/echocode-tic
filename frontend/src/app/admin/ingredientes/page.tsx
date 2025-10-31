@@ -134,7 +134,7 @@ export default function IngredientesPage() {
   });
 
   return (
-    <div className="p-8">
+    <div className="p-8 flex flex-col max-h-screen">
       <AdminHeader
         title="Ingredientes"
         description="Gestiona los ingredientes para pizzas y hamburguesas"
