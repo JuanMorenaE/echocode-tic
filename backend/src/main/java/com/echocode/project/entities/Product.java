@@ -11,23 +11,20 @@ import lombok.*;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int productId;
+    private long id;
 
-    @NonNull
     @Column(length = 100, nullable = false)
     private String name;
 
     @Column(length = 500)
     private String description;
 
-    @NonNull
     @Column(nullable = false)
     private double price;
 
-    @NonNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductType productType;
+    private ProductType type;
 
     @Column(length = 50)
     private String category;

@@ -119,7 +119,12 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   const handleAgregar = () => {
     // TODO: Agregar al carrito
     const selected_ingredients = categories.flatMap(i => i.selected_ingredients);
-    console.log(selected_ingredients);
+    console.log({
+      name: nombre,
+      isFavorite: isFavorite,
+      ingredients: selected_ingredients,
+      type: "BURGER"
+    });
 
     onClose();
   };

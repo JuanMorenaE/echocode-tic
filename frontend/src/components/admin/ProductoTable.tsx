@@ -12,9 +12,22 @@ interface ProductoTableProps {
 
 export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProps) => {
   const getTipoIcon = (tipo: string) => {
-    if (tipo === 'PIZZA') return <PizzaIcon size={24} weight="fill" className="text-primary-600" />;
-    if (tipo === 'HAMBURGUESA') return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
-    return '📦';
+    switch(tipo) {
+      case "PIZZA":
+        return <PizzaIcon size={24} weight="fill" className="text-primary-600" />;
+        break;
+
+      case "BURGER":
+        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
+        break;
+
+      case "BURGER":
+        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
+        break;
+
+      default:
+        return '📦';
+    };
   };
 
   const getTipoBadge = (tipo: string) => {

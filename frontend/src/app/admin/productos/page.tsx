@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ProductoTable } from '@/components/admin/ProductoTable';
 import { ProductoForm } from '@/components/admin/ProductoForm';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -9,16 +9,34 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Producto } from '@/types/producto.types';
 import { useToast } from '@/context/ToastContext';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 export default function ProductosPage() {
   const { success, error } = useToast();
   
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        setLoading(true)
+        const response = await fetch('http://localhost:8080/api/v1/products');
+        const data: Producto[] = await response.json()
+  
+        console.log(data)
+        setProductos(data)
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   const [productos, setProductos] = useState<Producto[]>([
-    { id: 1, tipo: 'ACOMPAÑAMIENTO', name: 'Papas Fritas', price: 150, description: 'Porción grande de papas fritas crujientes' },
-    { id: 2, tipo: 'ACOMPAÑAMIENTO', name: 'Aros de Cebolla', price: 180, description: '8 aros de cebolla rebozados' },
-    { id: 3, tipo: 'BEBIDA', name: 'Coca Cola 500ml', price: 80, description: 'Bebida refrescante' },
-    { id: 4, tipo: 'BEBIDA', name: 'Agua Mineral', price: 60, description: 'Agua mineral sin gas' },
-    { id: 5, tipo: 'BEBIDA', name: 'Cerveza Artesanal', price: 150, description: 'Cerveza artesanal de la casa' },
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,18 +46,37 @@ export default function ProductosPage() {
     isOpen: false,
   });
 
-  const handleCreateProducto = (data: Partial<Producto>) => {
-    const newProducto: Producto = {
-      id: Math.max(...productos.map(p => p.id), 0) + 1,
-      ...data,
-    } as Producto;
+  const handleCreateProducto = async (data: Producto) => {
+    const { id, ...newProduct} = data;
 
-    setProductos([...productos, newProducto]);
-    setIsModalOpen(false);
-    success(`Producto "${data.name}" creado exitosamente`);
+    console.log(newProduct)
+    
+    try{
+      const response = await fetch('http://localhost:8080/api/v1/products', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(newProduct)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error en la creación del producto (${response.status})`);
+      }
+
+      const created = await response.json();
+
+      setProductos([...productos, created]);
+      setIsModalOpen(false);
+      success(`Producto "${created.name}" creado exitosamente`);
+    }catch(ex){
+      console.error(ex)
+      error("Ocurrio un error inesperado, contacta a un administrador.")
+    }
   };
 
-  const handleEditProducto = (data: Partial<Producto>) => {
+  const handleEditProducto = async (data: Producto) => {
     setProductos(productos.map(p => 
       p.id === editingProducto?.id ? { ...p, ...data } : p
     ));
@@ -101,12 +138,23 @@ export default function ProductosPage() {
         </div>
       </div>
 
-      {/* Tabla de productos */}
-      <ProductoTable
-        productos={filteredProductos}
-        onEdit={openEditModal}
-        onDelete={openDeleteConfirm}
-      />
+      {
+        loading && (
+          <div className='py-8 flex justify-center items-center text-center'>
+            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500'/>
+          </div>
+        )
+      }
+
+      {/* Tabla de productos */
+        !loading && (
+          <ProductoTable
+            productos={filteredProductos}
+            onEdit={openEditModal}
+            onDelete={openDeleteConfirm}
+          />
+        )
+      }
 
       {/* Modal de crear/editar */}
       <Modal

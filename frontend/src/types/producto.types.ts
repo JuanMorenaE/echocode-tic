@@ -3,11 +3,14 @@ export interface Producto {
   name: string;
   price: number;
   description: string;
-  tipo?: string;
-  badge?: {
-    text: string;
-    color: string;
-  };
+  type?: ProductType;
+  category?: string;
+  isAvailable: boolean;
+  imageUrl?: string;
 }
 
-export type ProductCategory = 'hamburguesas' | 'pizzas' | 'acompañamientos' | 'bebidas';
+export type ProductType =
+  | 'SIDE'
+  | 'DRINK'
+  | 'DESSERT'
+  | 'OTHER';
