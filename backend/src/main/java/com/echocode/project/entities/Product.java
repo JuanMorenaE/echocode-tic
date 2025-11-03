@@ -3,6 +3,9 @@ package com.echocode.project.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Date;
+import java.time.LocalDateTime;
+
 @Entity
 @Builder
 @Getter @Setter
@@ -32,6 +35,12 @@ public class Product {
     @Column(nullable = false)
     @Builder.Default
     private boolean isAvailable = true;
+
+    private LocalDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by", referencedColumnName = "userId")
+    private Administrator deletedBy;
 
     @Column(length = 500)
     private String imageUrl;

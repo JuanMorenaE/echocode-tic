@@ -3,6 +3,7 @@ package com.echocode.project.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,7 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/creations").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/ingredients/**").permitAll()
-                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/addresses/**").permitAll()
                         .anyRequest().authenticated()
                 )

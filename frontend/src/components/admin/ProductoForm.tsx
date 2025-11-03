@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
@@ -17,15 +17,19 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
     name: producto?.name || '',
     price: producto?.price?.toString() || '',
     description: producto?.description || '',
-    type: producto?.type || 'OTHER'
+    type: producto?.type || 'SIDE'
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const tipoProductoOptions = [
-    { value: 'ACOMPAÑAMIENTO', label: 'Acompañamiento' },
-    { value: 'BEBIDA', label: 'Bebida' },
+    { value: 'SIDE', label: 'Acompañamiento'},
+    { value: 'DRINK', label: 'Bebida' },
   ];
+
+  useEffect(() => {
+    console.log(formData)
+  }, [])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

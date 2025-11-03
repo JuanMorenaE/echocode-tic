@@ -1,9 +1,11 @@
 package com.echocode.project.controllers;
 
 import com.echocode.project.entities.Product;
+import com.echocode.project.entities.User;
 import com.echocode.project.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,5 +33,11 @@ public class ProductController {
     public ResponseEntity<Product> update(@RequestBody Product product) {
         Product updatedProduct = productService.update(product);
         return ResponseEntity.ok(updatedProduct);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Product> delete(@RequestBody Product product, @AuthenticationPrincipal User user) {
+        Product deletedProduct = productService.delete(product, user);
+        return ResponseEntity.ok(deletedProduct);
     }
 }

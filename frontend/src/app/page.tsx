@@ -10,6 +10,8 @@ import { ProductCard } from '@/components/ui/Card';
 import { PizzaIcon, HamburgerIcon, HeartIcon } from '@/components/icons';
 import { Producto } from '@/types/producto.types';
 import useAuth from '@/hooks/useAuth';
+import { useToast } from '@/context/ToastContext';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'favoritos' | 'acompañamientos' | 'bebidas'>('favoritos');
@@ -17,19 +19,31 @@ export default function Home() {
   const { state } = useAuth();
   const isLoggedIn = !!state?.token;
 
-  // TODO: Obtener productos del backend
-  const acompañamientos: Producto[] = [
-    { id: 1, tipo: 'ACOMPAÑAMIENTO', name: 'Papas Fritas', price: 150, description: 'Porción grande de papas fritas crujientes' },
-    { id: 2, tipo: 'ACOMPAÑAMIENTO', name: 'Aros de Cebolla', price: 180, description: '8 aros de cebolla rebozados' },
-    { id: 3, tipo: 'ACOMPAÑAMIENTO', name: 'Nuggets de Pollo', price: 200, description: '10 nuggets de pollo con salsa' },
-  ];
+  const { success, error } = useToast();
+  const [loadingProducts, setLoadingProducts] = useState<boolean>(true);
+  const [sides, setSides] = useState<Producto[]>([]);
+  const [drinks, setDrinks] = useState<Producto[]>([]);
 
-  const bebidas: Producto[] = [
-    { id: 4, tipo: 'BEBIDA', name: 'Coca Cola 500ml', price: 80, description: 'Bebida refrescante' },
-    { id: 5, tipo: 'BEBIDA', name: 'Agua Mineral', price: 60, description: 'Agua mineral sin gas' },
-    { id: 6, tipo: 'BEBIDA', name: 'Cerveza Artesanal', price: 150, description: 'Cerveza artesanal de la casa' },
-    { id: 7, tipo: 'BEBIDA', name: 'Jugo Natural', price: 100, description: 'Jugo natural de naranja' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        setLoadingProducts(true)
+        const response = await fetch('http://localhost:8080/api/v1/products');
+        const data: Producto[] = await response.json()
+  
+        console.log(data)
+        setSides(data.filter(item => item.type === 'SIDE'))
+        setDrinks(data.filter(item => item.type === 'DRINK'))
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }finally{
+        setLoadingProducts(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   const favoritos: Producto[] = []; // TODO: Obtener favoritos del usuario
 
@@ -121,7 +135,7 @@ export default function Home() {
                 name={item.name}
                 price={item.price}
                 description={item.description}
-                icon={item.tipo === 'PIZZA' ?
+                icon={item.type === 'DRINK' ?
                   <PizzaIcon size={80} weight="fill" className="text-primary-600" /> :
                   <HamburgerIcon size={80} weight="fill" className="text-primary-600" />
                 }
@@ -136,19 +150,28 @@ export default function Home() {
     if (activeTab === 'acompañamientos') {
       return (
         <>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Acompañamientos</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {acompañamientos.map((item, index) => (
-              <ProductCard
-                key={item.id}
-                name={item.name}
-                price={item.price}
-                description={item.description}
-                icon={<span className="text-6xl">🍟</span>}
-                animationDelay={index * 100}
-              />
-            ))}
-          </div>
+          {loadingProducts ? (
+            <div className="flex justify-center items-center py-10">
+              <SpinnerGapIcon className="w-10 h-10 animate-spin text-gray-500" />
+            </div>
+          ) : (
+            <>
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Acompañamientos</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {sides.map((item, index) => (
+                  <ProductCard
+                    key={item.id}
+                    name={item.name}
+                    price={item.price}
+                    description={item.description}
+                    icon={<span className="text-6xl">🍟</span>}
+                    animationDelay={index * 100}
+                  />
+                ))}
+              </div>
+            </>
+          )
+        }
         </>
       );
     }
@@ -156,19 +179,28 @@ export default function Home() {
     if (activeTab === 'bebidas') {
       return (
         <>
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">Bebidas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {bebidas.map((item, index) => (
-              <ProductCard
-                key={item.id}
-                name={item.name}
-                price={item.price}
-                description={item.description}
-                icon={<span className="text-6xl">🥤</span>}
-                animationDelay={index * 100}
-              />
-            ))}
-          </div>
+        {loadingProducts ? (
+            <div className="flex justify-center items-center py-10">
+              <SpinnerGapIcon className="w-10 h-10 animate-spin text-gray-500" />
+            </div>
+          ) : (
+            <>
+              <h2 className="text-3xl font-bold text-gray-900 mb-8">Bebidas</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {drinks.map((item, index) => (
+                  <ProductCard
+                    key={item.id}
+                    name={item.name}
+                    price={item.price}
+                    description={item.description}
+                    icon={<span className="text-6xl">🥤</span>}
+                    animationDelay={index * 100}
+                  />
+                ))}
+              </div>
+            </> 
+          )
+        }
         </>
       );
     }

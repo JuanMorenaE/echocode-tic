@@ -16,6 +16,8 @@ export default function ProductosPage() {
   
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [token, setToken] = useState<string>();
+
   useEffect(() => {
     const fetchData = async () => {
       try{
@@ -36,6 +38,11 @@ export default function ProductosPage() {
     fetchData()
   }, [])
 
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token') ?? "")
+  }, []);
+
   const [productos, setProductos] = useState<Producto[]>([
   ]);
 
@@ -55,7 +62,8 @@ export default function ProductosPage() {
       const response = await fetch('http://localhost:8080/api/v1/products', {
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         method: 'POST',
         body: JSON.stringify(newProduct)
@@ -77,22 +85,72 @@ export default function ProductosPage() {
   };
 
   const handleEditProducto = async (data: Producto) => {
-    setProductos(productos.map(p => 
-      p.id === editingProducto?.id ? { ...p, ...data } : p
-    ));
-    setIsModalOpen(false);
-    setEditingProducto(undefined);
-    success(`Producto "${data.name}" actualizado exitosamente`);
+    console.log(token)
+    try{
+      const response = await fetch('http://localhost:8080/api/v1/products', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error al actualizar producto (${response.status})`);
+      }
+
+      const updated = await response.json();
+
+      setProductos((prev) =>
+        prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+      );
+  
+      setIsModalOpen(false);
+      setEditingProducto(undefined);
+      success(`Producto "${data.name}" actualizado exitosamente`);
+    }catch(ex){
+      console.error(ex)
+      error("Ocurrio un error inesperado, contacta a un administrador.")
+    }
   };
 
   const openDeleteConfirm = (producto: Producto) => {
     setDeleteConfirm({ isOpen: true, producto });
   };
 
-  const handleDeleteProducto = () => {
+  const handleDeleteProducto = async() => {
     if (deleteConfirm.producto) {
-      setProductos(productos.filter(p => p.id !== deleteConfirm.producto!.id));
-      success(`Producto "${deleteConfirm.producto.name}" eliminado exitosamente`);
+
+      console.log("Eliminando...")
+
+      try{
+        const response = await fetch('http://localhost:8080/api/v1/products', {
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          method: 'DELETE',
+          body: JSON.stringify(deleteConfirm.producto)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error al actualizar producto (${response.status})`);
+        }
+
+        const deleted = await response.json();
+
+        setProductos(productos.filter(p => p.id !== deleted.id));
+    
+        setIsModalOpen(false);
+        success(`Producto "${deleted.name}" eliminado exitosamente`);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }
+
       setDeleteConfirm({ isOpen: false });
     }
   };

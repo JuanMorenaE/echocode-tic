@@ -1,6 +1,6 @@
 'use client';
 
-import { Ingrediente } from '@/types/ingrediente.types';
+import { CategoriaIngrediente, Ingrediente } from '@/types/ingrediente.types';
 import { PencilSimpleIcon, TrashIcon, PizzaIcon, HamburgerIcon } from '@/components/icons';
 import { Button } from '@/components/ui/Button';
 
@@ -23,7 +23,7 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
       : 'bg-orange-100 text-orange-800';
   };
 
-  const getCategoriaBadge = (categoria: string) => {
+  const getCategoriaBadge = (categoria: CategoriaIngrediente) => {
     const colors: Record<string, string> = {
       MASA: 'bg-amber-100 text-amber-800',
       SALSA: 'bg-red-100 text-red-800',
@@ -32,8 +32,6 @@ export const IngredienteTable = ({ ingredientes, onEdit, onDelete }: Ingrediente
       PAN: 'bg-amber-100 text-amber-800',
       CARNE: 'bg-red-100 text-red-800',
       ADEREZO: 'bg-yellow-100 text-yellow-800',
-      VEGETAL: 'bg-green-100 text-green-800',
-      EXTRA: 'bg-purple-100 text-purple-800',
     };
 
     return colors[categoria] || 'bg-gray-100 text-gray-800';
