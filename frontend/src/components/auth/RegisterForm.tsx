@@ -165,24 +165,6 @@ export const RegisterForm = () => {
         error={errors.confirmPassword}
       />
 
-      <div className="flex items-start">
-        <input
-          type="checkbox"
-          required
-          className="w-4 h-4 mt-1 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-        />
-        <label className="ml-2 text-sm text-gray-600">
-          Acepto los{' '}
-          <Link href="#" className="text-primary-600 hover:text-primary-700">
-            términos y condiciones
-          </Link>{' '}
-          y la{' '}
-          <Link href="#" className="text-primary-600 hover:text-primary-700">
-            política de privacidad
-          </Link>
-        </label>
-      </div>
-
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           {errors.submit}

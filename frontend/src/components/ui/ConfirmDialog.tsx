@@ -2,6 +2,7 @@
 
 import { Button } from './Button';
 import { Modal } from './Modal';
+import { Warning, Trash, Info } from '@phosphor-icons/react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -32,20 +33,20 @@ export const ConfirmDialog = ({
   const getTypeStyles = () => {
     if (type === 'danger') {
       return {
-        icon: '🗑️',
+        icon: <Trash weight="bold" className="text-red-500" />,
         iconBg: 'bg-red-100',
         confirmVariant: 'danger' as const
       };
     }
     if (type === 'warning') {
       return {
-        icon: '⚠️',
+        icon: <Warning weight="bold" className="text-yellow-500" />,
         iconBg: 'bg-yellow-100',
         confirmVariant: 'primary' as const
       };
     }
     return {
-      icon: 'ℹ️',
+      icon: <Info weight="bold" className="text-blue-500" />,
       iconBg: 'bg-blue-100',
       confirmVariant: 'primary' as const
     };
@@ -69,7 +70,7 @@ export const ConfirmDialog = ({
 
         {/* Actions */}
         <div className="flex gap-3 justify-center">
-          <Button variant="ghost" onClick={onClose} size="lg">
+          <Button variant="ghost" onClick={onClose} size="lg" className="flex-1 bg-white text-black hover:bg-gray-100 border border-gray-300 ">
             {cancelText}
           </Button>
           <Button variant={styles.confirmVariant} onClick={handleConfirm} size="lg">

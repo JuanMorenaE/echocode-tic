@@ -4,6 +4,8 @@ import './globals.css';
 import QueryProvider from '@/lib/react-query/QueryProvider';
 import { ToastProvider } from '@/context/ToastContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
+import CartModal from '@/components/layout/CartModal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,7 +25,10 @@ export default function RootLayout({
         <QueryProvider>
           <ToastProvider>
             <AuthProvider>
-              {children}
+              <CartProvider>
+                {children}
+                <CartModal />
+              </CartProvider>
             </AuthProvider>
           </ToastProvider>
         </QueryProvider>

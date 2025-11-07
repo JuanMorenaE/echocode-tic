@@ -5,7 +5,7 @@ export interface Producto {
   description: string;
   type?: ProductType;
   category?: string;
-  isAvailable: boolean;
+  available: boolean;
   imageUrl?: string;
 }
 

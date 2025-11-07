@@ -17,14 +17,14 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
     name: producto?.name || '',
     price: producto?.price?.toString() || '',
     description: producto?.description || '',
-    type: producto?.type || 'OTHER'
+    type: producto?.type || 'SIDE' as ProductType
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const tipoProductoOptions = [
-    { value: 'ACOMPAÑAMIENTO', label: 'Acompañamiento' },
-    { value: 'BEBIDA', label: 'Bebida' },
+    { value: 'SIDE', label: 'Acompañamiento' },
+    { value: 'DRINK', label: 'Bebida' },
   ];
 
   const validateForm = () => {
@@ -61,7 +61,7 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
         name: formData.name,
         description: formData.description,
         price: Number(formData.price),
-        isAvailable: true,
+        available: true,
       };
 
       await onSubmit(productoData);

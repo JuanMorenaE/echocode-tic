@@ -13,16 +13,12 @@ interface ProductoTableProps {
 export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProps) => {
   const getTipoIcon = (tipo: string) => {
     switch(tipo) {
-      case "PIZZA":
-        return <PizzaIcon size={24} weight="fill" className="text-primary-600" />;
+      case "DRINK":
+        return '🥤';
         break;
 
-      case "BURGER":
-        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
-        break;
-
-      case "BURGER":
-        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
+      case "SIDE":
+        return '🍟';
         break;
 
       default:
@@ -32,10 +28,8 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
 
   const getTipoBadge = (tipo: string) => {
     const colors: Record<string, string> = {
-      PIZZA: 'bg-red-100 text-red-800',
-      HAMBURGUESA: 'bg-orange-100 text-orange-800',
-      ACOMPAÑAMIENTO: 'bg-yellow-100 text-yellow-800',
-      BEBIDA: 'bg-blue-100 text-blue-800',
+      SIDE: 'bg-yellow-100 text-yellow-800',
+      DRINK: 'bg-blue-100 text-blue-800',
     };
 
     return (
@@ -64,13 +58,13 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
-                      {getTipoIcon(producto.tipo || '')}
+                      {getTipoIcon(producto.type || '')}
                     </div>
                     <span className="font-medium text-gray-900">{producto.name}</span>
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                  {getTipoBadge(producto.tipo || 'PIZZA')}
+                  {getTipoBadge(producto.type || 'PIZZA')}
                 </td>
                 <td className="py-4 px-6 max-w-xs">
                   <p className="text-sm text-gray-600 truncate">{producto.description}</p>

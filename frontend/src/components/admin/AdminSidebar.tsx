@@ -13,6 +13,7 @@ import {
   SignOutIcon,
   StorefrontIcon
 } from '@/components/icons';
+import useAuth from '@/hooks/useAuth';
 
 const menuItems = [
   {
@@ -48,6 +49,7 @@ const menuItems = [
 ];
 
 export const AdminSidebar = () => {
+  const { logout } = useAuth();
   const pathname = usePathname();
 
   return (
@@ -93,14 +95,8 @@ export const AdminSidebar = () => {
 
       {/* Footer */}
       <div className="p-4 border-t border-gray-200">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          <HouseIcon size={20} />
-          <span className="font-medium">Ir al sitio</span>
-        </Link>
         <button
+          onClick={logout}
           className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-2"
         >
           <SignOutIcon size={20} />
