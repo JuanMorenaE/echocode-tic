@@ -14,7 +14,7 @@ import { SpinnerGapIcon } from '@phosphor-icons/react';
 export default function FuncionariosPage() {
   const { success, error } = useToast();
   
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   /**useEffect(() => {
     const fetchData = async () => {
