@@ -16,7 +16,7 @@ export default function FuncionariosPage() {
   
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  /**useEffect(() => {
     const fetchData = async () => {
       try{
         setLoading(true)
@@ -34,7 +34,7 @@ export default function FuncionariosPage() {
     }
 
     fetchData()
-  }, [])
+  }, [])/** */
 
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([
   ]);
@@ -51,7 +51,7 @@ export default function FuncionariosPage() {
 
     console.log(newFuncionario)
 
-    try{
+    /**try{
       const response = await fetch('http://localhost:8080/api/v1/products', {
         headers: {
           'Accept': 'application/json',
@@ -63,7 +63,7 @@ export default function FuncionariosPage() {
 
       if (!response.ok) {
         throw new Error(`Error en la creación del funcionario (${response.status})`);
-      }
+      } 
 
       const created = await response.json();
 
@@ -73,8 +73,8 @@ export default function FuncionariosPage() {
     }catch(ex){
       console.error(ex)
       error("Ocurrio un error inesperado, contacta a un administrador.")
-    }
-  };
+    }/** */
+  }
 
   const handleEditFuncionario = async (data: Funcionario) => {
     setFuncionarios(funcionarios.map(f => 
