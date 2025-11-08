@@ -1,8 +1,9 @@
 'use client';
 
-import { Producto } from '@/types/producto.types';
+import { PRODUCT_TYPES, Producto, ProductType } from '@/types/producto.types';
 import { PencilSimpleIcon, TrashIcon, PizzaIcon, HamburgerIcon } from '@/components/icons';
 import { Button } from '@/components/ui/Button';
+import { useEffect } from 'react';
 
 interface ProductoTableProps {
   productos: Producto[];
@@ -11,7 +12,7 @@ interface ProductoTableProps {
 }
 
 export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProps) => {
-  const getTipoIcon = (tipo: string) => {
+  const getTipoIcon = (tipo: ProductType) => {
     switch(tipo) {
       case "DRINK":
         return '🥤';
@@ -26,17 +27,17 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
     };
   };
 
-  const getTipoBadge = (tipo: string) => {
+  useEffect(() => {
+    console.log(productos)
+  }, [])
+
+  const getTipoBadge = (tipo: ProductType) => {
     const colors: Record<string, string> = {
       SIDE: 'bg-yellow-100 text-yellow-800',
       DRINK: 'bg-blue-100 text-blue-800',
     };
 
-    return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${colors[tipo] || 'bg-gray-100 text-gray-800'}`}>
-        {tipo}
-      </span>
-    );
+    return colors[tipo] || 'bg-gray-100 text-gray-800';
   };
 
   return (

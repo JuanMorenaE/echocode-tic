@@ -17,6 +17,8 @@ export default function ProductosPage() {
   
   const [loading, setLoading] = useState<boolean>(true);
 
+  const [token, setToken] = useState<string>();
+
   useEffect(() => {
     const fetchData = async () => {
       try{
@@ -36,6 +38,11 @@ export default function ProductosPage() {
 
     fetchData()
   }, [])
+
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token') ?? "")
+  }, []);
 
   const [productos, setProductos] = useState<Producto[]>([
   ]);

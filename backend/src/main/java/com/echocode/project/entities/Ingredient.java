@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.sql.Date;
+
 @Entity
 @Builder
 @Getter @Setter
@@ -33,6 +35,12 @@ public class Ingredient {
     private int quantity = 1;
 
     private boolean isEnabled;
+
+    private Date deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by", referencedColumnName = "userId")
+    private Administrator deletedBy;
 }
 
 enum IngredientCategory {

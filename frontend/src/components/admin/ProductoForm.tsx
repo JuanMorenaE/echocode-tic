@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
@@ -26,6 +26,10 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
     { value: 'SIDE', label: 'Acompañamiento' },
     { value: 'DRINK', label: 'Bebida' },
   ];
+
+  useEffect(() => {
+    console.log(formData)
+  }, [])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};

@@ -11,6 +11,9 @@ export interface Producto {
 
 export type ProductType =
   | 'SIDE'
-  | 'DRINK'
-  | 'DESSERT'
-  | 'OTHER';
+  | 'DRINK';
+
+export const PRODUCT_TYPES: { value: ProductType; label: string }[] = [
+  { value: 'SIDE', label: 'ACOMPAÑAMIENTO' },
+  { value: 'DRINK', label: 'BEBIDA' },
+];
