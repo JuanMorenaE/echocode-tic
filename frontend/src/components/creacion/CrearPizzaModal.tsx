@@ -8,6 +8,12 @@ import { CATEGORIAS_PIZZA, Ingrediente } from '@/types/ingrediente.types';
 import { StarIcon } from '@/components/icons';
 import { Category } from '@/types/category.types';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import useCart from '@/hooks/useCart';
+import useAuth from '@/hooks/useAuth';
+import type { CreacionCarrito } from '@/types/carrito.types';
+import { useToast } from '@/context/ToastContext';
+import api from '@/lib/axios/axiosConfig';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 interface CrearPizzaModalProps {
   isOpen: boolean;
@@ -19,25 +25,31 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const { agregarCreacion } = useCart();
+  const { success, error: showError } = useToast();
+  const { state } = useAuth();
+  const isLoggedIn = !!state?.token;
 
   useEffect(() => {
     if (!isOpen) return;
 
+    // Si no está logueado, mostrar modal de autenticación
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setTotalPrice(0)
-  
+
     async function fetchData() {
       try {
         setLoading(true);
 
-        const response = await fetch('http://localhost:8080/api/v1/ingredients/type', {
-          headers: { "Content-Type": "application/json" },
-          method: 'POST',
-          body: JSON.stringify("PIZZA")
-        });
-
-        if (!response.ok) throw new Error('Error en la respuesta');
-        const data: Ingrediente[] = await response.json();
+        const resp = await api.post<Ingrediente[]>('/v1/ingredients/type', "PIZZA");
+        const data = resp.data;
 
         const grouped = data.reduce((accumulator, ingredient) => {
           if (!accumulator[ingredient.category]) 
@@ -73,7 +85,7 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
     }
   
     fetchData();
-  }, [isOpen]);
+  }, [isOpen, isLoggedIn]);
 
   const calcularPrecio = () => {
     let total = 0
@@ -96,13 +108,85 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
     return required_categories.every(c => c.selected_ingredients.length > 0);
   }
 
-  const handleAgregar = () => {
-    // TODO: Agregar al carrito
-    const selected_ingredients = categories.flatMap(i => i.selected_ingredients);
-    console.log(selected_ingredients);
-    
-    onClose();
+  // Manejar el click en el botón de favorito
+  const handleFavoriteToggle = () => {
+    setIsFavorite(!isFavorite);
   };
+
+  const handleAgregar = async () => {
+    setSaving(true);
+    try {
+      // Obtener todos los ingredientes seleccionados
+      const ingredientesSeleccionados: Ingrediente[] = [];
+
+      categories.forEach(category => {
+        category.selected_ingredients.forEach(selectedId => {
+          const ingrediente = category.ingredients.find(i => i.id === selectedId);
+          if (ingrediente) {
+            ingredientesSeleccionados.push(ingrediente);
+          }
+        });
+      });
+
+      // Validar que haya ingredientes
+      if (ingredientesSeleccionados.length === 0) {
+        showError('Selecciona al menos un ingrediente antes de guardar la creación.');
+        setSaving(false);
+        return;
+      }
+
+      // Crear la creación para el carrito
+      const creacion: CreacionCarrito = {
+        tipo: 'PIZZA',
+        nombre: nombre.trim() || 'Mi Pizza Personalizada',
+        ingredientes: ingredientesSeleccionados,
+        esFavorito: isFavorite,
+      };
+
+      // Agregar al carrito (CartContext se encarga de guardar en backend si está logueado)
+      agregarCreacion(creacion);
+
+      // Mostrar toast de confirmación
+      success(
+        isFavorite
+          ? '¡Pizza agregada al carrito y a favoritos!'
+          : '¡Pizza agregada al carrito!'
+      );
+
+      // Resetear el formulario
+      setNombre('');
+      setIsFavorite(false);
+      setCategories(prevCategories =>
+        prevCategories.map(cat => ({ ...cat, selected_ingredients: [] }))
+      );
+      setTotalPrice(0);
+
+      onClose();
+    } catch (error) {
+      console.error('Error al agregar pizza:', error);
+      showError('Ocurrió un error al agregar la pizza');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Si no está logueado, mostrar AuthModal
+  if (!isLoggedIn) {
+    return (
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          onClose(); // Cerrar también el modal principal
+        }}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // El useEffect se encargará de cargar los datos cuando isLoggedIn cambie
+        }}
+        defaultTab="login"
+      />
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Crear Pizza" size="lg">
@@ -118,7 +202,7 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
           />
         </div>
         <button
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={handleFavoriteToggle}
           className="ml-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
@@ -184,9 +268,9 @@ export const CrearPizzaModal = ({ isOpen, onClose }: CrearPizzaModalProps) => {
           <Button
             onClick={handleAgregar}
             className="flex-1"
-            disabled={!requiredCompleted()}
+            disabled={!requiredCompleted() || saving}
           >
-            Agregar al Carrito
+            {saving ? 'Guardando...' : 'Agregar al Carrito'}
           </Button>
         </div>
       </div>

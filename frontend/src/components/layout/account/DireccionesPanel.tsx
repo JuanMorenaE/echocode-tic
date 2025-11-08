@@ -2,26 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { MapPinIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
 import addressApi from '@/services/api/addressApi';
+import DireccionModal from './DireccionModal';
 import type { Address, AddressRequest } from '@/types/address.types';
 
 const DireccionesPanel: React.FC = () => {
   const [direcciones, setDirecciones] = useState<Address[]>([]);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [nuevaDireccion, setNuevaDireccion] = useState<Partial<AddressRequest>>({
-    alias: '',
-    street: '',
-    number: '',
-    apartmentNumber: '',
-    city: '',
-    zipCode: '',
-    additionalInfo: '',
-    isDefault: false,
-  });
 
   // Cargar direcciones al montar el componente
   useEffect(() => {
@@ -41,43 +31,16 @@ const DireccionesPanel: React.FC = () => {
     }
   };
 
-  const handleAgregarDireccion = async () => {
-    if (!nuevaDireccion.alias || !nuevaDireccion.street || !nuevaDireccion.number || !nuevaDireccion.city || !nuevaDireccion.zipCode) {
-      alert('Por favor completa los campos obligatorios (Alias, Calle, Número, Ciudad, Código Postal)');
-      return;
-    }
-
+  const handleAgregarDireccion = async (request: AddressRequest) => {
     setIsSaving(true);
     try {
-      const request: AddressRequest = {
-        alias: nuevaDireccion.alias!,
-        street: nuevaDireccion.street!,
-        number: nuevaDireccion.number!,
-        apartmentNumber: nuevaDireccion.apartmentNumber || '',
-        city: nuevaDireccion.city!,
-        zipCode: nuevaDireccion.zipCode!,
-        additionalInfo: nuevaDireccion.additionalInfo || '',
-        isDefault: nuevaDireccion.isDefault || false,
-      };
-
       await addressApi.create(request);
       await loadAddresses(); // Recargar lista
-
-      // Resetear formulario
-      setNuevaDireccion({
-        alias: '',
-        street: '',
-        number: '',
-        apartmentNumber: '',
-        city: '',
-        zipCode: '',
-        additionalInfo: '',
-        isDefault: false,
-      });
-      setMostrarFormulario(false);
+      setMostrarModal(false);
     } catch (error) {
       console.error('Error creando dirección:', error);
       alert('Error al guardar la dirección');
+      throw error; // Re-lanzar el error para que el modal lo maneje
     } finally {
       setIsSaving(false);
     }
@@ -134,82 +97,13 @@ const DireccionesPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Mis Direcciones</h2>
         <Button
-          onClick={() => setMostrarFormulario(!mostrarFormulario)}
+          onClick={() => setMostrarModal(true)}
           className="flex items-center gap-2"
         >
           <PlusIcon size={20} />
           Nueva Dirección
         </Button>
       </div>
-
-      {/* Formulario para nueva dirección */}
-      {mostrarFormulario && (
-        <div className="bg-gray-50 p-6 rounded-lg space-y-4 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Agregar Dirección</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Alias *"
-              placeholder="Ej: Casa, Trabajo"
-              value={nuevaDireccion.alias}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, alias: e.target.value })}
-            />
-
-            <Input
-              label="Calle *"
-              placeholder="Ej: Av. 18 de Julio"
-              value={nuevaDireccion.street}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, street: e.target.value })}
-            />
-
-            <Input
-              label="Número *"
-              placeholder="1234"
-              value={nuevaDireccion.number}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, number: e.target.value })}
-            />
-
-            <Input
-              label="Apartamento"
-              placeholder="301"
-              value={nuevaDireccion.apartmentNumber}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, apartmentNumber: e.target.value })}
-            />
-
-            <Input
-              label="Ciudad *"
-              placeholder="Montevideo"
-              value={nuevaDireccion.city}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, city: e.target.value })}
-            />
-
-            <Input
-              label="Código Postal *"
-              placeholder="11200"
-              value={nuevaDireccion.zipCode}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, zipCode: e.target.value })}
-            />
-
-            <div className="md:col-span-2">
-              <Input
-                label="Información adicional"
-                placeholder="Ej: Portón verde, Timbre 2"
-                value={nuevaDireccion.additionalInfo}
-                onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, additionalInfo: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 justify-end pr-12 md:pr-16">
-            <Button variant="ghost" onClick={() => setMostrarFormulario(false)} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAgregarDireccion} isLoading={isSaving}>
-              Agregar
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Lista de direcciones */}
       <div className="space-y-4">
@@ -276,6 +170,14 @@ const DireccionesPanel: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Modal para agregar dirección */}
+      <DireccionModal
+        isOpen={mostrarModal}
+        onClose={() => setMostrarModal(false)}
+        onSubmit={handleAgregarDireccion}
+        isSaving={isSaving}
+      />
     </div>
   );
 };

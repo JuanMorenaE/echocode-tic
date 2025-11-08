@@ -16,7 +16,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
   const [formData, setFormData] = useState({
     tipoProducto: ingrediente?.type || 'PIZZA',
     nombre: ingrediente?.name || '',
-    categoria: ingrediente?.category || 'MASA',
+    categoria: ingrediente?.category || 'TAMAÑO',
     precio: ingrediente?.price?.toString() || '',
     cantidad: ingrediente?.quantity?.toString() || '1',
   });
@@ -36,7 +36,7 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
   // Resetear categoría si cambia el tipo de producto
   useEffect(() => {
     if (formData.tipoProducto === 'PIZZA' && !CATEGORIAS_PIZZA.find(c => c.value === formData.categoria)) {
-      setFormData(prev => ({ ...prev, categoria: 'MASA' }));
+      setFormData(prev => ({ ...prev, categoria: 'TAMAÑO' }));
     } else if (formData.tipoProducto === 'BURGER' && !CATEGORIAS_HAMBURGUESA.find(c => c.value === formData.categoria)) {
       setFormData(prev => ({ ...prev, categoria: 'PAN' }));
     }

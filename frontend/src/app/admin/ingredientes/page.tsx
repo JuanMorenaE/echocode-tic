@@ -10,6 +10,7 @@ import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Ingrediente } from '@/types/ingrediente.types';
 import { useToast } from '@/context/ToastContext';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import api from '@/lib/axios/axiosConfig';
 
 export default function IngredientesPage() {
   const { success, error } = useToast();
@@ -20,11 +21,11 @@ export default function IngredientesPage() {
     const fetchData = async () => {
       try{
         setLoading(true)
-        const response = await fetch('http://localhost:8080/api/v1/ingredients');
-        const data: Ingrediente[] = await response.json()
-  
-        console.log(data)
-        setIngredientes(data)
+  const resp = await api.get<Ingrediente[]>('/v1/ingredients');
+  const data = resp.data;
+
+  console.log(data);
+  setIngredientes(data);
       }catch(ex){
         console.error(ex)
         error("Ocurrio un error inesperado, contacta a un administrador.")
@@ -50,20 +51,8 @@ export default function IngredientesPage() {
     const { id, ...newIngrediente} = data;
     
     try{
-      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(newIngrediente)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error en la creación del ingrediente (${response.status})`);
-      }
-
-      const created = await response.json();
+  const resp = await api.post('/v1/ingredients', newIngrediente);
+  const created = resp.data;
 
       setIngredientes([...ingredientes, created]);
       setIsModalOpen(false);
@@ -76,31 +65,20 @@ export default function IngredientesPage() {
 
   const handleEditIngrediente = async (data: Ingrediente) => {
     try{
-      const response = await fetch('http://localhost:8080/api/v1/ingredients', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'PUT',
-        body: JSON.stringify(data)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error al actualizar ingrediente (${response.status})`);
-      }
-
-      const updated = await response.json();
+      const { id, ...updateData } = data;
+      const resp = await api.put(`/v1/ingredients/${id}`, updateData);
+      const updated = resp.data;
 
       setIngredientes((prev) =>
-        prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+        prev.map((i) => (i.id === updated.id ? updated : i))
       );
-  
+
       setIsModalOpen(false);
       setEditingIngrediente(undefined);
       success(`Ingrediente "${updated.name}" actualizado exitosamente`);
     }catch(ex){
       console.error(ex)
-      error("Ocurrio un error inesperado, contacta a un administrador.")
+      error("Ocurrió un error al actualizar el ingrediente.")
     }
   };
 
@@ -108,11 +86,18 @@ export default function IngredientesPage() {
     setDeleteConfirm({ isOpen: true, ingrediente });
   };
 
-  const handleDeleteIngrediente = () => {
+  const handleDeleteIngrediente = async () => {
     if (deleteConfirm.ingrediente) {
-      setIngredientes(ingredientes.filter(i => i.id !== deleteConfirm.ingrediente!.id));
-      success(`Ingrediente "${deleteConfirm.ingrediente.name}" eliminado exitosamente`);
-      setDeleteConfirm({ isOpen: false });
+      try {
+        await api.delete(`/v1/ingredients/${deleteConfirm.ingrediente.id}`);
+
+        setIngredientes(ingredientes.filter(i => i.id !== deleteConfirm.ingrediente!.id));
+        success(`Ingrediente "${deleteConfirm.ingrediente.name}" eliminado exitosamente`);
+        setDeleteConfirm({ isOpen: false });
+      } catch (ex) {
+        console.error(ex);
+        error("Ocurrió un error al eliminar el ingrediente.");
+      }
     }
   };
 

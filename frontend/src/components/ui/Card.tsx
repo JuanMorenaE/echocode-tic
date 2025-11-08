@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils/cn';
+import { StarIcon } from '@/components/icons';
 
 interface CardProps {
   children: ReactNode;
@@ -35,21 +36,48 @@ interface ProductCardProps {
     color: string;
   };
   animationDelay?: number;
+  onAddToCart?: () => void;
+  isFavorite?: boolean;
+  onFavoriteToggle?: () => void;
+  onCardClick?: () => void;
 }
 
-export const ProductCard = ({ 
-  name, 
-  price, 
-  description, 
-  icon, 
+export const ProductCard = ({
+  name,
+  price,
+  description,
+  icon,
   badge,
-  animationDelay = 0 
+  animationDelay = 0,
+  onAddToCart,
+  isFavorite = false,
+  onFavoriteToggle,
+  onCardClick
 }: ProductCardProps) => {
   return (
-    <Card 
-      className="animate-fade-in"
+    <Card
+      className="animate-fade-in flex flex-col relative"
       style={{ animationDelay: `${animationDelay}ms` }}
+      onClick={onCardClick}
     >
+      {/* Estrella de favorito */}
+      {onFavoriteToggle && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onFavoriteToggle();
+          }}
+          className="absolute top-3 right-3 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all hover:scale-110"
+          title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          <StarIcon
+            size={24}
+            weight={isFavorite ? 'fill' : 'regular'}
+            className={isFavorite ? 'text-yellow-500' : 'text-gray-400'}
+          />
+        </button>
+      )}
+
       {/* Imagen/Icono */}
       <div className="w-full h-48 bg-gradient-to-br from-primary-200 to-primary-100 rounded-xl mb-4 flex items-center justify-center">
         {icon}
@@ -58,19 +86,32 @@ export const ProductCard = ({
       {/* Header con nombre y precio */}
       <div className="flex justify-between items-start mb-3">
         <h3 className="text-xl font-bold text-gray-900">{name}</h3>
-        <span className="text-xl font-bold text-primary-600">${price}</span>
+        <span className="text-xl font-bold text-gray-700">${price}</span>
       </div>
 
       {/* Descripción */}
-      <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+      <p className="text-gray-600 text-sm mb-4 leading-relaxed flex-1">
         {description}
       </p>
 
       {/* Badge opcional */}
       {badge && (
-        <span className={`inline-block ${badge.color} text-white px-3 py-1 rounded-full text-xs font-semibold`}>
+        <span className={`inline-block ${badge.color} text-white px-3 py-1 rounded-full text-xs font-semibold mb-3`}>
           {badge.text}
         </span>
+      )}
+
+      {/* Botón Agregar al Carrito */}
+      {onAddToCart && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddToCart();
+          }}
+          className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-md hover:shadow-lg"
+        >
+          Agregar al Carrito
+        </button>
       )}
     </Card>
   );

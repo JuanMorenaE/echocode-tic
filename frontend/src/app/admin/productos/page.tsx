@@ -10,6 +10,7 @@ import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Producto } from '@/types/producto.types';
 import { useToast } from '@/context/ToastContext';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import api from '@/lib/axios/axiosConfig';
 
 export default function ProductosPage() {
   const { success, error } = useToast();
@@ -21,12 +22,12 @@ export default function ProductosPage() {
   useEffect(() => {
     const fetchData = async () => {
       try{
-        setLoading(true)
-        const response = await fetch('http://localhost:8080/api/v1/products');
-        const data: Producto[] = await response.json()
-  
-        console.log(data)
-        setProductos(data)
+  setLoading(true);
+  const resp = await api.get<Producto[]>('/v1/products');
+  const data = resp.data;
+
+  console.log(data);
+  setProductos(data);
       }catch(ex){
         console.error(ex)
         error("Ocurrio un error inesperado, contacta a un administrador.")
@@ -59,21 +60,8 @@ export default function ProductosPage() {
     console.log(newProduct)
     
     try{
-      const response = await fetch('http://localhost:8080/api/v1/products', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        method: 'POST',
-        body: JSON.stringify(newProduct)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error en la creación del producto (${response.status})`);
-      }
-
-      const created = await response.json();
+      const resp = await api.post('/v1/products', newProduct);
+      const created = resp.data;
 
       setProductos([...productos, created]);
       setIsModalOpen(false);
@@ -85,34 +73,19 @@ export default function ProductosPage() {
   };
 
   const handleEditProducto = async (data: Producto) => {
-    console.log(token)
-    try{
-      const response = await fetch('http://localhost:8080/api/v1/products', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        method: 'PUT',
-        body: JSON.stringify(data)
-      });
+    try {
+      const { id, ...updateData } = data;
+      await api.put(`/v1/products/${id}`, updateData);
 
-      if (!response.ok) {
-        throw new Error(`Error al actualizar producto (${response.status})`);
-      }
-
-      const updated = await response.json();
-
-      setProductos((prev) =>
-        prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
-      );
-  
+      setProductos(productos.map(p =>
+        p.id === id ? data : p
+      ));
       setIsModalOpen(false);
       setEditingProducto(undefined);
       success(`Producto "${data.name}" actualizado exitosamente`);
-    }catch(ex){
-      console.error(ex)
-      error("Ocurrio un error inesperado, contacta a un administrador.")
+    } catch (ex) {
+      console.error(ex);
+      error("Ocurrió un error al actualizar el producto.");
     }
   };
 
@@ -120,38 +93,18 @@ export default function ProductosPage() {
     setDeleteConfirm({ isOpen: true, producto });
   };
 
-  const handleDeleteProducto = async() => {
+  const handleDeleteProducto = async () => {
     if (deleteConfirm.producto) {
+      try {
+        await api.delete(`/v1/products/${deleteConfirm.producto.id}`);
 
-      console.log("Eliminando...")
-
-      try{
-        const response = await fetch('http://localhost:8080/api/v1/products', {
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          method: 'DELETE',
-          body: JSON.stringify(deleteConfirm.producto)
-        });
-
-        if (!response.ok) {
-          throw new Error(`Error al actualizar producto (${response.status})`);
-        }
-
-        const deleted = await response.json();
-
-        setProductos(productos.filter(p => p.id !== deleted.id));
-    
-        setIsModalOpen(false);
-        success(`Producto "${deleted.name}" eliminado exitosamente`);
-      }catch(ex){
-        console.error(ex)
-        error("Ocurrio un error inesperado, contacta a un administrador.")
+        setProductos(productos.filter(p => p.id !== deleteConfirm.producto!.id));
+        success(`Producto "${deleteConfirm.producto.name}" eliminado exitosamente`);
+        setDeleteConfirm({ isOpen: false });
+      } catch (ex) {
+        console.error(ex);
+        error("Ocurrió un error al eliminar el producto.");
       }
-
-      setDeleteConfirm({ isOpen: false });
     }
   };
 

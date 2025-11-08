@@ -51,4 +51,5 @@ enum IngredientCategory {
     PAN,
     CARNE,
     ADEREZO,
+    TAMAÑO,
 }

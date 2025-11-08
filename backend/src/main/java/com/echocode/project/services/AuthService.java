@@ -3,7 +3,9 @@ package com.echocode.project.services;
 import com.echocode.project.dto.AuthResponse;
 import com.echocode.project.dto.LoginRequest;
 import com.echocode.project.dto.RegisterRequest;
+import com.echocode.project.entities.Administrator;
 import com.echocode.project.entities.Client;
+import com.echocode.project.repositories.AdministratorRepository;
 import com.echocode.project.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +22,9 @@ public class AuthService {
 
     @Autowired
     private ClientRepository clientRepository;
+
+    @Autowired
+    private AdministratorRepository administratorRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -61,8 +66,8 @@ public class AuthService {
 
         clientRepository.save(client);
 
-    // Generar token (ahora incluimos userId como claim)
-    String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId());
+        // Generar token con role CLIENT
+        String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId(), "CLIENT");
 
         // Formatear birthdate para la respuesta
         String birthdateStr = null;
@@ -79,6 +84,7 @@ public class AuthService {
                 .phoneNumber(client.getPhoneNumber())
                 .cedula(client.getDocument())
                 .birthdate(birthdateStr)
+                .role("CLIENT")
                 .message("User registered successfully")
                 .build();
     }
@@ -92,12 +98,30 @@ public class AuthService {
                 )
         );
 
-        // Buscar el cliente
+        // Intentar buscar como administrador primero
+        var adminOptional = administratorRepository.findByEmail(request.getEmail());
+        if (adminOptional.isPresent()) {
+            Administrator admin = adminOptional.get();
+            String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), admin.getEmail(), admin.getUserId(), "ADMIN");
+
+            return AuthResponse.builder()
+                    .token(jwtToken)
+                    .email(admin.getEmail())
+                    .firstName(admin.getFirstName())
+                    .lastName(admin.getLastName())
+                    .phoneNumber(admin.getPhoneNumber())
+                    .cedula(admin.getDocument())
+                    .role("ADMIN")
+                    .message("Login successful")
+                    .build();
+        }
+
+        // Si no es admin, buscar como cliente
         Client client = clientRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Generar token (ahora incluimos userId como claim)
-    String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId());
+        // Generar token con role CLIENT
+        String jwtToken = jwtService.generateToken(new java.util.HashMap<>(), client.getEmail(), client.getUserId(), "CLIENT");
 
         // Formatear birthdate para la respuesta
         String birthdateStr = null;
@@ -114,6 +138,7 @@ public class AuthService {
                 .phoneNumber(client.getPhoneNumber())
                 .cedula(client.getDocument())
                 .birthdate(birthdateStr)
+                .role("CLIENT")
                 .message("Login successful")
                 .build();
     }

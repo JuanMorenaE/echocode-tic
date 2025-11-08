@@ -19,13 +19,20 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-    } else {
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Cleanup function que siempre se ejecuta
+    return () => {
       const scrollY = document.body.style.top;
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -39,7 +46,7 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex justify-center items-center bg-black/50 p-4"
+      className="fixed inset-0 z-[100] flex justify-center items-center bg-black/50 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       {/* Modal */}
@@ -50,12 +57,16 @@ export const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalPr
         )}
         onClick={(e) => e.stopPropagation()} // evita cerrar al hacer click dentro
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 rounded-t-3xl">
-          <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
+        {/* Header: título centrado visualmente, botón de cerrar a la derecha */}
+        <div className="relative flex items-center px-6 py-4 border-b border-gray-200 rounded-t-3xl min-h-[68px]">
+          <h3 className="text-2xl font-bold text-gray-900 absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            {title}
+          </h3>
+
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label="Cerrar"
           >
             <XIcon size={24} />
           </button>

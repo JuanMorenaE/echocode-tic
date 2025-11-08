@@ -31,11 +31,10 @@ public class SecurityConfig {
                 .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/creations").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/ingredients/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/addresses/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/creations/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

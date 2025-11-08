@@ -1,31 +1,29 @@
 package com.echocode.project.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.io.Serializable;
+import lombok.*;
 
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Builder
 @Table(name = "order_creations")
 public class OrderCreation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "orderId")
-    private Order orderId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creationId")
-    private Creation creationId;
+    @JoinColumn(name = "orderId", nullable = false)
+    private Order order;
 
-    private int quantity;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creationId", nullable = false)
+    private Creation creation;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private int quantity = 1;
 }
 
 

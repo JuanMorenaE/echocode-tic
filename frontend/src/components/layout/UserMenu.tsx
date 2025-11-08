@@ -2,11 +2,15 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { UserIcon, UserCircleIcon, ShoppingBagIcon, HeartIcon, SignOutIcon, MapPinIcon, CreditCardIcon } from '@/components/icons';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import useAuth from '@/hooks/useAuth';
+import useCart from '@/hooks/useCart';
 
 export const UserMenu: React.FC = () => {
-  const { state, logout } = useAuth();
+  const { state, logout, isLoading } = useAuth();
+  const { carrito } = useCart();
   const [open, setOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -17,7 +21,7 @@ export const UserMenu: React.FC = () => {
     return () => window.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const openPanel = (panel: 'perfil' | 'mis-pedidos' | 'favoritos' | 'direcciones' | 'tarjetas') => {
+  const openPanel = (panel: 'perfil' | 'mis-pedidos' | 'direcciones' | 'tarjetas') => {
     window.dispatchEvent(new CustomEvent('openAccount', { detail: { panel } }));
     setOpen(false);
   };
@@ -120,18 +124,13 @@ export const UserMenu: React.FC = () => {
                 <span className="font-medium">Mis Pedidos</span>
               </button>
 
-              <button
-                onClick={() => openPanel('favoritos')}
-                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors flex items-center gap-3 text-gray-700 hover:text-primary-600"
-              >
-                <HeartIcon size={20} className="text-gray-400" />
-                <span className="font-medium">Favoritos</span>
-              </button>
-
               <div className="border-t border-gray-100 my-2" />
 
               <button
-                onClick={() => { logout(); }}
+                onClick={() => {
+                  setOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
                 className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors flex items-center gap-3 text-red-600 hover:text-red-700"
               >
                 <SignOutIcon size={20} />
@@ -141,6 +140,25 @@ export const UserMenu: React.FC = () => {
           </div>
         </>
       )}
+
+      {/* Modal de confirmación para cerrar sesión */}
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          logout();
+          setShowLogoutConfirm(false);
+        }}
+        title="Cerrar Sesión"
+        message={
+          carrito.items.length > 0
+            ? `Tienes ${carrito.items.length} ${carrito.items.length === 1 ? 'producto' : 'productos'} en tu carrito. Si cierras sesión, se perderá tu carrito. ¿Estás seguro?`
+            : "¿Estás seguro que quieres cerrar sesión?"
+        }
+        confirmText="Cerrar Sesión"
+        cancelText="Cancelar"
+        type="warning"
+      />
     </div>
   );
 };

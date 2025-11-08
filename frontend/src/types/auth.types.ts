@@ -21,6 +21,7 @@ export interface AuthResponse {
   phoneNumber?: string;
   cedula?: string;
   birthdate?: string;
+  role?: 'CLIENT' | 'ADMIN';
   message?: string;
 }
 
@@ -33,5 +34,6 @@ export interface AuthState {
     phoneNumber?: string;
     cedula?: string;
     birthdate?: string;
+    role?: 'CLIENT' | 'ADMIN';
   } | null;
 }
