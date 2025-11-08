@@ -43,7 +43,8 @@ import {
   Lock,
   ClipboardText,
   TagChevron,
-  Calendar
+  Calendar,
+  Funnel
 } from '@phosphor-icons/react';
 
 interface IconProps {
@@ -397,4 +398,12 @@ export const CalendarIcon = ({
   weight = 'regular',
 }: IconProps) => {
   return <Calendar size={size} className={className} weight={weight} />;
+};
+
+export const FunnelIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <Funnel size={size} className={className} weight={weight} />;
 };

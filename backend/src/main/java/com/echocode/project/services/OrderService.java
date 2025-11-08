@@ -208,10 +208,33 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+
+        return orders.stream()
+                .map(order -> {
+                    List<OrderCreation> orderCreations = orderCreationRepository.findByOrder_OrderId(order.getOrderId());
+                    List<OrderProduct> orderProducts = orderProductRepository.findByOrder_OrderId(order.getOrderId());
+                    return buildOrderResponse(order, orderCreations, orderProducts);
+                })
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public OrderResponse updateOrderStatus(int orderId, String newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+        // Validar que el pedido no esté cancelado o entregado
+        if (order.getOrderStatus() == OrderStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "No se puede actualizar el estado de un pedido cancelado");
+        }
+
+        if (order.getOrderStatus() == OrderStatus.DELIVERED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "No se puede actualizar el estado de un pedido ya entregado");
+        }
 
         try {
             OrderStatus status = OrderStatus.valueOf(newStatus.toUpperCase());

@@ -73,6 +73,28 @@ const orderApi = {
     }
   },
 
+  // Admin: Obtener todos los pedidos
+  async getAllOrders(): Promise<OrderResponse[]> {
+    try {
+      const res = await api.get<OrderResponse[]>('/v1/admin/orders');
+      return res.data;
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message;
+
+        if (status === 401) {
+          throw new Error('Debes iniciar sesión');
+        } else if (status === 403) {
+          throw new Error('No tienes permisos de administrador');
+        } else if (message) {
+          throw new Error(message);
+        }
+      }
+      throw new Error('Error al obtener los pedidos');
+    }
+  },
+
   async updateStatus(orderId: number, newStatus: string): Promise<OrderResponse> {
     try {
       const res = await api.patch<OrderResponse>(`/v1/orders/${orderId}/status`, {
@@ -82,14 +104,17 @@ const orderApi = {
     } catch (error) {
       if (error instanceof AxiosError) {
         const status = error.response?.status;
-        const message = error.response?.data?.message;
+        const message = error.response?.data?.message || error.response?.data?.error;
 
         if (status === 401) {
           throw new Error('Debes iniciar sesión');
         } else if (status === 400) {
+          // Usar el mensaje del backend si está disponible
           throw new Error(message || 'Estado inválido');
         } else if (status === 404) {
           throw new Error('Pedido no encontrado');
+        } else if (status === 403) {
+          throw new Error('No tienes permisos para realizar esta acción');
         } else if (message) {
           throw new Error(message);
         }

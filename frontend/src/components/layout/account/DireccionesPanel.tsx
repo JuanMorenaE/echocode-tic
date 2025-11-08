@@ -3,15 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { MapPinIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useToast } from '@/context/ToastContext';
 import addressApi from '@/services/api/addressApi';
 import DireccionModal from './DireccionModal';
 import type { Address, AddressRequest } from '@/types/address.types';
 
 const DireccionesPanel: React.FC = () => {
+  const { success, error } = useToast();
   const [direcciones, setDirecciones] = useState<Address[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; id: number | null }>({ show: false, id: null });
 
   // Cargar direcciones al montar el componente
   useEffect(() => {
@@ -23,9 +27,9 @@ const DireccionesPanel: React.FC = () => {
     try {
       const data = await addressApi.getAll();
       setDirecciones(data);
-    } catch (error) {
-      console.error('Error cargando direcciones:', error);
-      alert('Error al cargar las direcciones');
+    } catch (err) {
+      console.error('Error cargando direcciones:', err);
+      error('Error al cargar las direcciones');
     } finally {
       setIsLoading(false);
     }
@@ -37,26 +41,55 @@ const DireccionesPanel: React.FC = () => {
       await addressApi.create(request);
       await loadAddresses(); // Recargar lista
       setMostrarModal(false);
-    } catch (error) {
-      console.error('Error creando dirección:', error);
-      alert('Error al guardar la dirección');
-      throw error; // Re-lanzar el error para que el modal lo maneje
+      success('Dirección agregada correctamente');
+    } catch (err) {
+      console.error('Error creando dirección:', err);
+      error('Error al guardar la dirección');
+      throw err; // Re-lanzar el error para que el modal lo maneje
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleEliminarDireccion = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta dirección?')) {
+  const handleEliminarDireccion = async () => {
+    if (confirmDelete.id === null) return;
+
+    // Verificar si es predeterminada antes de intentar eliminar
+    const direccion = direcciones.find(d => d.id === confirmDelete.id);
+    if (direccion?.isDefault) {
+      error('No puedes eliminar la dirección predeterminada. Marca otra como predeterminada primero.');
+      setConfirmDelete({ show: false, id: null });
       return;
     }
 
     try {
-      await addressApi.delete(id);
+      await addressApi.delete(confirmDelete.id);
       await loadAddresses(); // Recargar lista
-    } catch (error) {
-      console.error('Error eliminando dirección:', error);
-      alert('Error al eliminar la dirección');
+      success('Dirección eliminada correctamente');
+    } catch (err: any) {
+      console.error('Error eliminando dirección:', err);
+
+      // Manejo específico de errores de Axios
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.message || err.response.data?.error;
+
+        if (status === 404) {
+          error('La dirección no existe o ya fue eliminada');
+        } else if (status === 400 || status === 409) {
+          error(message || 'No se puede eliminar esta dirección');
+        } else if (status === 403) {
+          error('No tienes permisos para eliminar esta dirección');
+        } else {
+          error('Error al eliminar la dirección. Intenta nuevamente.');
+        }
+      } else if (err.request) {
+        error('Error de conexión. Verifica tu internet.');
+      } else {
+        error('Error inesperado al eliminar la dirección');
+      }
+    } finally {
+      setConfirmDelete({ show: false, id: null });
     }
   };
 
@@ -78,9 +111,10 @@ const DireccionesPanel: React.FC = () => {
 
       await addressApi.update(id, request);
       await loadAddresses(); // Recargar lista
-    } catch (error) {
-      console.error('Error marcando dirección como predeterminada:', error);
-      alert('Error al actualizar la dirección');
+      success('Dirección predeterminada actualizada');
+    } catch (err) {
+      console.error('Error marcando dirección como predeterminada:', err);
+      error('Error al actualizar la dirección');
     }
   };
 
@@ -158,9 +192,14 @@ const DireccionesPanel: React.FC = () => {
                     </button>
                   )}
                   <button
-                    onClick={() => handleEliminarDireccion(direccion.id)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar"
+                    onClick={() => setConfirmDelete({ show: true, id: direccion.id })}
+                    disabled={direccion.isDefault}
+                    className={`p-2 rounded-lg transition-colors ${
+                      direccion.isDefault
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                    title={direccion.isDefault ? 'No puedes eliminar la dirección predeterminada' : 'Eliminar'}
                   >
                     <TrashIcon size={20} />
                   </button>
@@ -177,6 +216,18 @@ const DireccionesPanel: React.FC = () => {
         onClose={() => setMostrarModal(false)}
         onSubmit={handleAgregarDireccion}
         isSaving={isSaving}
+      />
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmDialog
+        isOpen={confirmDelete.show}
+        onClose={() => setConfirmDelete({ show: false, id: null })}
+        onConfirm={handleEliminarDireccion}
+        title="Eliminar dirección"
+        message="¿Estás seguro de que deseas eliminar esta dirección? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
       />
     </div>
   );

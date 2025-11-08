@@ -2,54 +2,85 @@
 
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { OrderResponse, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/types/order.types';
+import { Button } from '@/components/ui/Button';
+import { Select } from '@/components/ui/Select';
+import {
+  OrderResponse,
+  OrderStatus,
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_COLORS
+} from '@/types/order.types';
+import { Ingrediente, CategoriaIngrediente } from '@/types/ingrediente.types';
 import orderApi from '@/services/api/orderApi';
 import { useToast } from '@/context/ToastContext';
 import {
-  XIcon,
   ClipboardTextIcon,
   MapPinIcon,
   CreditCardIcon,
   CalendarIcon,
   PizzaIcon,
   HamburgerIcon,
-  XCircleIcon,
+  UserIcon,
 } from '@/components/icons';
 
-interface OrderDetailModalProps {
+interface AdminOrderDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: OrderResponse | null;
-  onOrderCancelled?: () => void; // Callback para recargar la lista
+  onOrderUpdated?: () => void; // Callback para recargar la lista
 }
 
-const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, order, onOrderCancelled }) => {
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
+const AdminOrderDetailModal: React.FC<AdminOrderDetailModalProps> = ({
+  isOpen,
+  onClose,
+  order,
+  onOrderUpdated
+}) => {
+  const [currentStatus, setCurrentStatus] = useState<OrderStatus>(order?.orderStatus || 'QUEUED');
+  const [isUpdating, setIsUpdating] = useState(false);
   const { success, error: showError } = useToast();
+
+  React.useEffect(() => {
+    if (order) {
+      setCurrentStatus(order.orderStatus);
+    }
+  }, [order]);
 
   if (!order) return null;
 
-  const canBeCancelled = order.orderStatus === 'QUEUED' || order.orderStatus === 'PREPARING';
+  const handleUpdateStatus = async () => {
+    if (currentStatus === order.orderStatus) {
+      showError('El estado no ha cambiado');
+      return;
+    }
 
-  const handleCancelOrder = async () => {
-    setIsCancelling(true);
+    // Validación adicional en el frontend
+    if (order.orderStatus === 'CANCELLED') {
+      showError('No se puede actualizar el estado de un pedido cancelado');
+      return;
+    }
+
+    if (order.orderStatus === 'DELIVERED') {
+      showError('No se puede actualizar el estado de un pedido ya entregado');
+      return;
+    }
+
+    setIsUpdating(true);
     try {
-      await orderApi.cancelOrder(order.orderId);
-      success('Pedido cancelado exitosamente');
-      setShowCancelConfirm(false);
-      onClose();
+      await orderApi.updateStatus(order.orderId, currentStatus);
+      success(`Estado actualizado a: ${ORDER_STATUS_LABELS[currentStatus]}`);
 
       // Llamar al callback para recargar la lista
-      if (onOrderCancelled) {
-        onOrderCancelled();
+      if (onOrderUpdated) {
+        onOrderUpdated();
       }
+
+      onClose();
     } catch (err: any) {
-      console.error('Error cancelando pedido:', err);
-      showError(err.message || 'Error al cancelar el pedido');
+      console.error('Error actualizando estado:', err);
+      showError(err.message || 'Error al actualizar el estado');
     } finally {
-      setIsCancelling(false);
+      setIsUpdating(false);
     }
   };
 
@@ -68,25 +99,75 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
 
   const totalItems = order.creations.length + order.products.reduce((sum, p) => sum + p.quantity, 0);
 
+  // Función para agrupar ingredientes por categoría
+  const groupIngredientsByCategory = (ingredients: Ingrediente[]) => {
+    // Orden para Pizza: Tamaño → Masa → Salsa → Queso → Toppings
+    const pizzaOrder: CategoriaIngrediente[] = ['TAMAÑO', 'MASA', 'SALSA', 'QUESO', 'TOPPING'];
+    // Orden para Hamburguesa: Pan → Carne → Toppings → Aderezos
+    const burgerOrder: CategoriaIngrediente[] = ['PAN', 'CARNE', 'TOPPING', 'ADEREZO'];
+
+    const categoryLabels: Record<CategoriaIngrediente, string> = {
+      'TAMAÑO': 'Tamaño',
+      'MASA': 'Masa',
+      'SALSA': 'Salsa',
+      'QUESO': 'Queso',
+      'TOPPING': 'Toppings',
+      'PAN': 'Pan',
+      'CARNE': 'Carne',
+      'ADEREZO': 'Aderezos'
+    };
+
+    // Agrupar por categoría
+    const grouped = ingredients.reduce((acc, ing) => {
+      const category = ing.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(ing);
+      return acc;
+    }, {} as Record<CategoriaIngrediente, Ingrediente[]>);
+
+    // Determinar si es pizza o hamburguesa basándose en las categorías presentes
+    const isPizza = grouped['MASA'] || grouped['SALSA'] || grouped['QUESO'] || grouped['TAMAÑO'];
+    const categoryOrder = isPizza ? pizzaOrder : burgerOrder;
+
+    // Ordenar según el orden definido
+    return categoryOrder
+      .filter(cat => grouped[cat] && grouped[cat].length > 0)
+      .map(cat => ({
+        category: cat,
+        label: categoryLabels[cat] || cat,
+        ingredients: grouped[cat]
+      }));
+  };
+
+  const statusOptions: { value: OrderStatus; label: string }[] = [
+    { value: 'QUEUED', label: ORDER_STATUS_LABELS.QUEUED },
+    { value: 'PREPARING', label: ORDER_STATUS_LABELS.PREPARING },
+    { value: 'ON_THE_WAY', label: ORDER_STATUS_LABELS.ON_THE_WAY },
+    { value: 'DELIVERED', label: ORDER_STATUS_LABELS.DELIVERED },
+    { value: 'CANCELLED', label: ORDER_STATUS_LABELS.CANCELLED },
+  ];
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" title={`Pedido #${order.orderId}`}>
       <div className="p-6">
-        {/* Header */}
+        {/* Header con ID del pedido */}
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">
               Pedido #{order.orderId}
             </h2>
-            <p className="text-sm text-gray-600">Hash: {order.orderHash.substring(0, 8)}...</p>
+            <p className="text-sm text-gray-600">Hash: {order.orderHash}</p>
           </div>
         </div>
 
-        {/* Estado y Fecha */}
+        {/* Estado actual y selector de nuevo estado */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <ClipboardTextIcon size={20} className="text-gray-600" />
-              <span className="text-sm text-gray-600">Estado</span>
+              <span className="text-sm text-gray-600 font-semibold">Estado Actual</span>
             </div>
             <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${ORDER_STATUS_COLORS[order.orderStatus]}`}>
               {ORDER_STATUS_LABELS[order.orderStatus]}
@@ -101,6 +182,44 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
             <p className="text-sm font-medium text-gray-900">{formatDate(order.orderDate)}</p>
           </div>
         </div>
+
+        {/* Cambiar estado */}
+        {order.orderStatus !== 'CANCELLED' && order.orderStatus !== 'DELIVERED' ? (
+          <div className="mb-6 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+            <label className="block text-sm font-semibold text-gray-900 mb-2">
+              Cambiar Estado del Pedido
+            </label>
+            <div className="flex gap-3">
+              <Select
+                value={currentStatus}
+                onChange={(e) => setCurrentStatus(e.target.value as OrderStatus)}
+                className="flex-1"
+                options={statusOptions}
+              />
+              <Button
+                onClick={handleUpdateStatus}
+                isLoading={isUpdating}
+                disabled={currentStatus === order.orderStatus}
+                variant="primary"
+              >
+                Actualizar
+              </Button>
+            </div>
+            {currentStatus !== order.orderStatus && (
+              <p className="text-xs text-gray-600 mt-2">
+                Se cambiará de <strong>{ORDER_STATUS_LABELS[order.orderStatus]}</strong> a <strong>{ORDER_STATUS_LABELS[currentStatus]}</strong>
+              </p>
+            )}
+          </div>
+        ) : (
+          <div className="mb-6 p-4 bg-gray-100 border border-gray-300 rounded-lg">
+            <p className="text-sm text-gray-700 font-medium">
+              {order.orderStatus === 'CANCELLED'
+                ? '⚠️ Este pedido ha sido cancelado y no puede ser modificado.'
+                : '✅ Este pedido ya ha sido entregado y no puede ser modificado.'}
+            </p>
+          </div>
+        )}
 
         {/* Creaciones */}
         {order.creations.length > 0 && (
@@ -129,22 +248,29 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
                       <p className="text-xs text-gray-500 mt-1">
                         {creation.ingredients.length} ingredientes
                       </p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {creation.ingredients.slice(0, 5).map((ing, idx) => (
-                          <span
-                            key={idx}
-                            className="text-xs bg-white px-2 py-1 rounded border border-gray-200"
-                          >
-                            {ing.name}
-                          </span>
+
+                      {/* Ingredientes agrupados por categoría */}
+                      <div className="mt-3 space-y-2">
+                        {groupIngredientsByCategory(creation.ingredients).map((group) => (
+                          <div key={group.category}>
+                            <p className="text-xs font-semibold text-gray-700 mb-1">
+                              {group.label}:
+                            </p>
+                            <div className="flex flex-wrap gap-1">
+                              {group.ingredients.map((ing, idx) => (
+                                <span
+                                  key={idx}
+                                  className="text-xs bg-white px-2 py-1 rounded border border-gray-200"
+                                >
+                                  {ing.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
                         ))}
-                        {creation.ingredients.length > 5 && (
-                          <span className="text-xs text-gray-500 px-2 py-1">
-                            +{creation.ingredients.length - 5} más
-                          </span>
-                        )}
                       </div>
-                      <p className="text-sm font-bold text-gray-900 mt-2">
+
+                      <p className="text-sm font-bold text-gray-900 mt-3">
                         {formatPrice(creation.totalPrice)}
                       </p>
                     </div>
@@ -248,40 +374,18 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div className="flex gap-3 mt-6">
-          {canBeCancelled && (
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              disabled={isCancelling}
-              className="flex-1 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <XCircleIcon size={20} />
-              Cancelar Pedido
-            </button>
-          )}
+        {/* Botón cerrar */}
+        <div className="mt-6">
           <button
             onClick={onClose}
-            className={`${canBeCancelled ? 'flex-1' : 'w-full'} bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors`}
+            className="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
           >
             Cerrar
           </button>
         </div>
       </div>
-
-      {/* Diálogo de confirmación */}
-      <ConfirmDialog
-        isOpen={showCancelConfirm}
-        onClose={() => setShowCancelConfirm(false)}
-        onConfirm={handleCancelOrder}
-        title="¿Cancelar pedido?"
-        message={`¿Estás seguro de que deseas cancelar el pedido #${order.orderId}? Esta acción no se puede deshacer.`}
-        confirmText={isCancelling ? "Cancelando..." : "Sí, cancelar"}
-        cancelText="No, mantener pedido"
-        type="danger"
-      />
     </Modal>
   );
 };
 
-export default OrderDetailModal;
+export default AdminOrderDetailModal;

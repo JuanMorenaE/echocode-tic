@@ -30,10 +30,6 @@ public class Creation
     @Enumerated(EnumType.STRING)
     private CreationType creationType;
 
-    @ManyToOne
-    @JoinColumn(name = "id")
-    private PizzaSize pizzaSize;
-
     @ManyToMany
     @JoinTable(
         name = "creation_ingredients",

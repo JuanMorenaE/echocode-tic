@@ -2,6 +2,7 @@ package com.echocode.project.controllers;
 
 import com.echocode.project.dto.OrderRequest;
 import com.echocode.project.dto.OrderResponse;
+import com.echocode.project.repositories.AdministratorRepository;
 import com.echocode.project.services.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +16,18 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/orders")
+@RequestMapping("/api/v1")
 public class OrderController {
 
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private AdministratorRepository administratorRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
-    @PostMapping
+    @PostMapping("/orders")
     public ResponseEntity<OrderResponse> createOrder(
             @RequestBody OrderRequest request,
             Authentication authentication
@@ -43,7 +47,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/orders/{id}")
     public ResponseEntity<OrderResponse> getOrderById(
             @PathVariable int id,
             Authentication authentication
@@ -57,7 +61,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
+    @GetMapping("/orders")
     public ResponseEntity<List<OrderResponse>> getMyOrders(Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -68,7 +72,28 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @PatchMapping("/{id}/status")
+    @GetMapping("/admin/orders")
+    public ResponseEntity<List<OrderResponse>> getAllOrders(Authentication authentication) {
+        if (authentication == null) {
+            logger.warn("getAllOrders called without authentication - request rejected");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String email = authentication.getName();
+
+        // Verificar que el usuario sea administrador
+        boolean isAdmin = administratorRepository.existsByEmail(email);
+        if (!isAdmin) {
+            logger.warn("getAllOrders called by non-admin user: {}", email);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        logger.info("getAllOrders called by admin: {}", email);
+        List<OrderResponse> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+    @PatchMapping("/orders/{id}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable int id,
             @RequestBody Map<String, String> body,
@@ -90,7 +115,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{id}/cancel")
+    @PostMapping("/orders/{id}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable int id,
             Authentication authentication

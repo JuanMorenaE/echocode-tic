@@ -3,15 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { CreditCardIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useToast } from '@/context/ToastContext';
 import cardApi from '@/services/api/cardApi';
 import TarjetaModal from './TarjetaModal';
 import type { Card, CardRequest, CardType } from '@/types/card.types';
 
 const TarjetasPanel: React.FC = () => {
+  const { success, error } = useToast();
   const [tarjetas, setTarjetas] = useState<Card[]>([]);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; id: number | null }>({ show: false, id: null });
 
   // Cargar tarjetas al montar el componente
   useEffect(() => {
@@ -23,9 +27,9 @@ const TarjetasPanel: React.FC = () => {
     try {
       const data = await cardApi.getAll();
       setTarjetas(data);
-    } catch (error) {
-      console.error('Error cargando tarjetas:', error);
-      alert('Error al cargar las tarjetas');
+    } catch (err) {
+      console.error('Error cargando tarjetas:', err);
+      error('Error al cargar las tarjetas');
     } finally {
       setIsLoading(false);
     }
@@ -38,26 +42,55 @@ const TarjetasPanel: React.FC = () => {
       await cardApi.create(request);
       await loadCards(); // Recargar lista
       setMostrarModal(false);
-    } catch (error) {
-      console.error('Error creando tarjeta:', error);
-      alert('Error al guardar la tarjeta');
-      throw error; // Re-lanzar el error para que el modal lo maneje
+      success('Tarjeta agregada correctamente');
+    } catch (err) {
+      console.error('Error creando tarjeta:', err);
+      error('Error al guardar la tarjeta');
+      throw err; // Re-lanzar el error para que el modal lo maneje
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleEliminarTarjeta = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta tarjeta?')) {
+  const handleEliminarTarjeta = async () => {
+    if (confirmDelete.id === null) return;
+
+    // Verificar si es predeterminada antes de intentar eliminar
+    const tarjeta = tarjetas.find(t => t.id === confirmDelete.id);
+    if (tarjeta?.isDefault) {
+      error('No puedes eliminar la tarjeta predeterminada. Marca otra como predeterminada primero.');
+      setConfirmDelete({ show: false, id: null });
       return;
     }
 
     try {
-      await cardApi.delete(id);
+      await cardApi.delete(confirmDelete.id);
       await loadCards(); // Recargar lista
-    } catch (error) {
-      console.error('Error eliminando tarjeta:', error);
-      alert('Error al eliminar la tarjeta');
+      success('Tarjeta eliminada correctamente');
+    } catch (err: any) {
+      console.error('Error eliminando tarjeta:', err);
+
+      // Manejo específico de errores de Axios
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.message || err.response.data?.error;
+
+        if (status === 404) {
+          error('La tarjeta no existe o ya fue eliminada');
+        } else if (status === 400 || status === 409) {
+          error(message || 'No se puede eliminar esta tarjeta');
+        } else if (status === 403) {
+          error('No tienes permisos para eliminar esta tarjeta');
+        } else {
+          error('Error al eliminar la tarjeta. Intenta nuevamente.');
+        }
+      } else if (err.request) {
+        error('Error de conexión. Verifica tu internet.');
+      } else {
+        error('Error inesperado al eliminar la tarjeta');
+      }
+    } finally {
+      setConfirmDelete({ show: false, id: null });
     }
   };
 
@@ -77,9 +110,10 @@ const TarjetasPanel: React.FC = () => {
 
       await cardApi.update(id, request);
       await loadCards(); // Recargar lista
-    } catch (error) {
-      console.error('Error marcando tarjeta como predeterminada:', error);
-      alert('Error al actualizar la tarjeta');
+      success('Tarjeta predeterminada actualizada');
+    } catch (err) {
+      console.error('Error marcando tarjeta como predeterminada:', err);
+      error('Error al actualizar la tarjeta');
     }
   };
 
@@ -151,9 +185,14 @@ const TarjetasPanel: React.FC = () => {
                     </button>
                   )}
                   <button
-                    onClick={() => handleEliminarTarjeta(tarjeta.id)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar"
+                    onClick={() => setConfirmDelete({ show: true, id: tarjeta.id })}
+                    disabled={tarjeta.isDefault}
+                    className={`p-2 rounded-lg transition-colors ${
+                      tarjeta.isDefault
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                    title={tarjeta.isDefault ? 'No puedes eliminar la tarjeta predeterminada' : 'Eliminar'}
                   >
                     <TrashIcon size={20} />
                   </button>
@@ -176,6 +215,18 @@ const TarjetasPanel: React.FC = () => {
         onClose={() => setMostrarModal(false)}
         onSubmit={handleAgregarTarjeta}
         isSaving={isSaving}
+      />
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmDialog
+        isOpen={confirmDelete.show}
+        onClose={() => setConfirmDelete({ show: false, id: null })}
+        onConfirm={handleEliminarTarjeta}
+        title="Eliminar tarjeta"
+        message="¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
       />
     </div>
   );
