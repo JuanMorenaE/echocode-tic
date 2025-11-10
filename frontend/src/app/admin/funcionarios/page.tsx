@@ -15,7 +15,7 @@ import api from '@/lib/axios/interceptors';
 export default function FuncionariosPage() {
   const { success, error } = useToast();
   
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string>();
 
