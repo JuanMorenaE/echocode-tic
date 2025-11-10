@@ -21,11 +21,11 @@ export default function IngredientesPage() {
     const fetchData = async () => {
       try{
         setLoading(true)
-  const resp = await api.get<Ingrediente[]>('/v1/ingredients');
-  const data = resp.data;
+        const resp = await api.get<Ingrediente[]>('/v1/ingredients');
+        const data = resp.data;
 
-  console.log(data);
-  setIngredientes(data);
+        console.log(data);
+        setIngredientes(data);
       }catch(ex){
         console.error(ex)
         error("Ocurrio un error inesperado, contacta a un administrador.")

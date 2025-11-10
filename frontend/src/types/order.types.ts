@@ -34,6 +34,7 @@ export interface OrderProductResponse {
   productName: string;
   quantity: number;
   price: number;
+  productType: "SIDE" | "DRINK";
 }
 
 export interface AddressResponse {
