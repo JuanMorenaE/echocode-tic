@@ -53,7 +53,7 @@ const AccountArea: React.FC = () => {
   }
 
   return (
-  <div className="bg-white shadow-md rounded-lg p-6 my-6 relative z-10 pr-12 md:pr-16">
+  <div className="bg-white shadow-md rounded-lg p-6 my-6 relative z-20 pr-12 md:pr-16">
       {/* Close button */}
       <button
         onClick={closePanel}

@@ -89,19 +89,6 @@ export const LoginForm = () => {
         error={errors.password}
       />
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center">
-          <input
-            type="checkbox"
-            className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <span className="ml-2 text-sm text-gray-600">Recordarme</span>
-        </label>
-        <Link href="/recuperar-password" className="text-sm text-primary-600 hover:text-primary-700">
-          ¿Olvidaste tu contraseña?
-        </Link>
-      </div>
-
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
           {errors.submit}

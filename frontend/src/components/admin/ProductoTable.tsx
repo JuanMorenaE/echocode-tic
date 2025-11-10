@@ -59,13 +59,13 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
-                      {getTipoIcon(producto.type || '')}
+                      {getTipoIcon(producto.type || 'SIDE')}
                     </div>
                     <span className="font-medium text-gray-900">{producto.name}</span>
                   </div>
                 </td>
                 <td className="py-4 px-6">
-                  {getTipoBadge(producto.type || 'PIZZA')}
+                  {getTipoBadge(producto.type || 'SIDE')}
                 </td>
                 <td className="py-4 px-6 max-w-xs">
                   <p className="text-sm text-gray-600 truncate">{producto.description}</p>

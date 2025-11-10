@@ -19,7 +19,7 @@ export const Header = () => {
   };
 
   return (
-    <header className="relative bg-gradient-to-br from-primary-600 to-primary-800 text-white overflow-hidden p-4">
+    <header className="relative bg-gradient-to-br from-primary-600 to-primary-800 text-white z-40 p-4">
       <div className='max-w-screen-xl w-full mx-auto flex flex-col'>
         {/* Patrón de fondo */}
         <div className="absolute inset-0 opacity-10 pointer-events-none z-0">
