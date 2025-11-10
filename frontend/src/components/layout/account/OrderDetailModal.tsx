@@ -167,7 +167,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
-                      🍟
+                      {product?.productType === 'DRINK' ? '🥤' : '🍟'}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{product.productName}</p>

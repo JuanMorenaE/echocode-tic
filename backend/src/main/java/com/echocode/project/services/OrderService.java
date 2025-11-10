@@ -290,6 +290,7 @@ public class OrderService {
                         .productId(Math.toIntExact(op.getProduct().getId()))
                         .productName(op.getProduct().getName())
                         .quantity(op.getQuantity())
+                        .productType(op.getProduct().getType())
                         .price(op.getPriceAtPurchase())
                         .build())
                 .collect(Collectors.toList());

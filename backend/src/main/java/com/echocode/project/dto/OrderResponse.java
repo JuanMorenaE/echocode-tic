@@ -1,5 +1,6 @@
 package com.echocode.project.dto;
 
+import com.echocode.project.entities.ProductType;
 import lombok.Builder;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -26,5 +27,6 @@ public class OrderResponse {
         private String productName;
         private Integer quantity;
         private Double price;
+        private ProductType productType;
     }
 }
