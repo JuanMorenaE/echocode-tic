@@ -1,9 +1,9 @@
 'use client';
 
 import { Funcionario } from '@/types/employes.types';
-import { PencilSimpleIcon, TrashIcon, PizzaIcon, HamburgerIcon } from '@/components/icons';
 import { Button } from '@/components/ui/Button';
-import { useState } from 'react';
+import { useEffect } from 'react';
+import { PencilSimpleIcon, TrashIcon } from '@/components/icons';
 
 interface FuncionarioTableProps {
   funcionarios: Funcionario[];
@@ -28,24 +28,27 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
 
       default:
         return '📦';
-    };
-  };/** */
+    };/** */
+
+   useEffect(() => {
+    console.log(funcionarios)
+  }, [])
 
 
-  const getTipoBadge = (tipo: string) => {
+  /*const getTipoBadge = (tipo: EmployeType) => {
     const colors: Record<string, string> = {
       PIZZA: 'bg-red-100 text-red-800',
       HAMBURGUESA: 'bg-orange-100 text-orange-800',
       ACOMPAÑAMIENTO: 'bg-yellow-100 text-yellow-800',
       BEBIDA: 'bg-blue-100 text-blue-800',
-    };
+    };/** */
 
-    return (
+    /*return (
       <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${colors[tipo] || 'bg-gray-100 text-gray-800'}`}>
         {tipo}
       </span>
     );
-  };
+  };/** */
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

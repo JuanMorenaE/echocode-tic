@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FuncionarioTable } from '@/components/admin/FuncionariosTable';
-import FuncionariosForm, { FuncionariosFormProps } from '@/components/admin/FuncionariosForm';
+import  FuncionariosForm from '@/components/admin/FuncionariosForm';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -10,11 +10,39 @@ import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Funcionario } from '@/types/employes.types';
 import { useToast } from '@/context/ToastContext';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import api from '@/lib/axios/interceptors';
 
 export default function FuncionariosPage() {
   const { success, error } = useToast();
   
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [token, setToken] = useState<string>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+  setLoading(true);
+  const resp = await api.get<Funcionario[]>('/v1/funcionarios');
+  const data = resp.data;
+
+  console.log(data);
+  setFuncionarios(data);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token') ?? "")
+  }, []);
 
   /**useEffect(() => {
     const fetchData = async () => {
@@ -46,12 +74,30 @@ export default function FuncionariosPage() {
     isOpen: false,
   });
 
-  const handleCreateFuncionario = async (data: Funcionario) => {
+    const handleCreateFuncionario = async (data: Funcionario) => {
+      const { id, ...newFuncionario} = data;
+  
+      console.log(newFuncionario)
+      
+      try{
+        const resp = await api.post('/v1/funcionarios', newFuncionario);
+        const created = resp.data;
+  
+        setFuncionarios([...funcionarios, created]);
+        setIsModalOpen(false);
+        success(`Funcionario "${created.full_name}" creado exitosamente`);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }
+    };
+
+  /**const handleCreateFuncionario = async (data: Funcionario) => {
     const { id, ...newFuncionario} = data;
 
     console.log(newFuncionario)
 
-    /**try{
+    try{
       const response = await fetch('http://localhost:8080/api/v1/products', {
         headers: {
           'Accept': 'application/json',
@@ -73,19 +119,38 @@ export default function FuncionariosPage() {
     }catch(ex){
       console.error(ex)
       error("Ocurrio un error inesperado, contacta a un administrador.")
-    }/** */
-  }
+    }
+  }/** */
 
-  const handleEditFuncionario = async (data: Funcionario) => {
+  /**const handleEditFuncionario = async (data: Funcionario) => {
     setFuncionarios(funcionarios.map(f => 
       f.id === editingFuncionario?.id ? { ...f, ...data } : f
     ));
     setIsModalOpen(false);
     setEditingFuncionario(undefined);
     success(`Funcionario "${data.full_name}" actualizado exitosamente`);
+  };/**
+  
+  */
+
+   const handleEditFuncionario = async (data: Funcionario) => {
+    try {
+      const { id, ...updateData } = data;
+      await api.put(`/v1/funcionarios/${id}`, updateData);
+
+      setFuncionarios(funcionarios.map(f =>
+        f.id === id ? data : f
+      ));
+      setIsModalOpen(false);
+      setEditingFuncionario(undefined);
+      success(`Funcionario "${data.full_name}" actualizado exitosamente`);
+    } catch (ex) {
+      console.error(ex);
+      error("Ocurrió un error al actualizar el funcionario.");
+    }
   };
 
-  const openDeleteConfirm = (funcionario: Funcionario) => {
+  /**const openDeleteConfirm = (funcionario: Funcionario) => {
     setDeleteConfirm({ isOpen: true, funcionario });
   };
 
@@ -95,7 +160,26 @@ export default function FuncionariosPage() {
       success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
       setDeleteConfirm({ isOpen: false });
     }
-  };
+  };/** */
+
+    const openDeleteConfirm = (funcionario: Funcionario) => {
+      setDeleteConfirm({ isOpen: true, funcionario });
+    };
+  
+    const handleDeleteFuncionario = async () => {
+      if (deleteConfirm.funcionario) {
+        try {
+          await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
+  
+          setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
+          success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
+          setDeleteConfirm({ isOpen: false });
+        } catch (ex) {
+          console.error(ex);
+          error("Ocurrió un error al eliminar el funcionario.");
+        }
+      }
+    };
 
   const openCreateModal = () => {
     setEditingFuncionario(undefined);
