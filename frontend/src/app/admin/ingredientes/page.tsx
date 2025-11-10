@@ -133,6 +133,11 @@ export default function IngredientesPage() {
     return matchesSearch && matchesTipo;
   });
 
+  useEffect(() => {
+    console.log("ingredientes:", ingredientes);
+    console.log("tipo:", typeof ingredientes);
+  }, [])
+
   return (
     <div className="p-8 flex flex-col max-h-screen">
       <AdminHeader
