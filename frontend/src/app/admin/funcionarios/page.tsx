@@ -10,6 +10,7 @@ import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
 import { Funcionario } from '@/types/employes.types';
 import { useToast } from '@/context/ToastContext';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
+import api from '@/lib/axios/interceptors';
 
 export default function FuncionariosPage() {
   const { success, error } = useToast();
@@ -46,12 +47,30 @@ export default function FuncionariosPage() {
     isOpen: false,
   });
 
-  const handleCreateFuncionario = async (data: Funcionario) => {
+    const handleCreateFuncionario = async (data: Funcionario) => {
+      const { id, ...newFuncionario} = data;
+  
+      console.log(newFuncionario)
+      
+      try{
+        const resp = await api.post('/v1/funcionarios', newFuncionario);
+        const created = resp.data;
+  
+        setFuncionarios([...funcionarios, created]);
+        setIsModalOpen(false);
+        success(`Funcionario "${created.full_name}" creado exitosamente`);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }
+    };
+
+  /**const handleCreateFuncionario = async (data: Funcionario) => {
     const { id, ...newFuncionario} = data;
 
     console.log(newFuncionario)
 
-    /**try{
+    try{
       const response = await fetch('http://localhost:8080/api/v1/products', {
         headers: {
           'Accept': 'application/json',
@@ -73,8 +92,8 @@ export default function FuncionariosPage() {
     }catch(ex){
       console.error(ex)
       error("Ocurrio un error inesperado, contacta a un administrador.")
-    }/** */
-  }
+    }
+  }/** */
 
   const handleEditFuncionario = async (data: Funcionario) => {
     setFuncionarios(funcionarios.map(f => 
