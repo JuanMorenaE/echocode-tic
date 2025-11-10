@@ -76,7 +76,11 @@ const orderApi = {
   // Admin: Obtener todos los pedidos
   async getAllOrders(): Promise<OrderResponse[]> {
     try {
-      const res = await api.get<OrderResponse[]>('/v1/admin/orders');
+      const res = await api.get<OrderResponse[]>('/v1/admin/orders', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      });
       return res.data;
     } catch (error) {
       if (error instanceof AxiosError) {

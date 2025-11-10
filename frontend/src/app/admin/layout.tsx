@@ -36,7 +36,8 @@ export default function AdminLayout({
     }
 
     // Verificar si el usuario es admin
-    if (state?.user?.role !== 'ADMIN') {
+    const payload = JSON.parse(atob(state.token.split(".")[1]));
+    if (payload.role !== 'ADMIN') {
       // console.log('AdminLayout - No es ADMIN (role:', state?.user?.role, '), redirigiendo a /');
       router.push('/');
       return;
