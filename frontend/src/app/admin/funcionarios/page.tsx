@@ -122,16 +122,35 @@ export default function FuncionariosPage() {
     }
   }/** */
 
-  const handleEditFuncionario = async (data: Funcionario) => {
+  /**const handleEditFuncionario = async (data: Funcionario) => {
     setFuncionarios(funcionarios.map(f => 
       f.id === editingFuncionario?.id ? { ...f, ...data } : f
     ));
     setIsModalOpen(false);
     setEditingFuncionario(undefined);
     success(`Funcionario "${data.full_name}" actualizado exitosamente`);
+  };/**
+  
+  */
+
+   const handleEditFuncionario = async (data: Funcionario) => {
+    try {
+      const { id, ...updateData } = data;
+      await api.put(`/v1/funcionarios/${id}`, updateData);
+
+      setFuncionarios(funcionarios.map(f =>
+        f.id === id ? data : f
+      ));
+      setIsModalOpen(false);
+      setEditingFuncionario(undefined);
+      success(`Funcionario "${data.full_name}" actualizado exitosamente`);
+    } catch (ex) {
+      console.error(ex);
+      error("Ocurrió un error al actualizar el funcionario.");
+    }
   };
 
-  const openDeleteConfirm = (funcionario: Funcionario) => {
+  /**const openDeleteConfirm = (funcionario: Funcionario) => {
     setDeleteConfirm({ isOpen: true, funcionario });
   };
 
@@ -141,7 +160,26 @@ export default function FuncionariosPage() {
       success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
       setDeleteConfirm({ isOpen: false });
     }
-  };
+  };/** */
+
+    const openDeleteConfirm = (funcionario: Funcionario) => {
+      setDeleteConfirm({ isOpen: true, funcionario });
+    };
+  
+    const handleDeleteFuncionario = async () => {
+      if (deleteConfirm.funcionario) {
+        try {
+          await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
+  
+          setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
+          success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
+          setDeleteConfirm({ isOpen: false });
+        } catch (ex) {
+          console.error(ex);
+          error("Ocurrió un error al eliminar el funcionario.");
+        }
+      }
+    };
 
   const openCreateModal = () => {
     setEditingFuncionario(undefined);
