@@ -14,5 +14,6 @@ public class AuthResponse {
     private String phoneNumber;
     private String cedula;
     private String birthdate;
+    private String role; // "CLIENT" o "ADMIN"
     private String message;
 }

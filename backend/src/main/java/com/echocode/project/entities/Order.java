@@ -21,15 +21,11 @@ public class Order {
     private String orderHash;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ownerId", insertable = false, updatable = false)
+    @JoinColumn(name = "ownerId", nullable = false)
     private Client owner;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "order_creations",
-            joinColumns = @JoinColumn(name = "orderId"),
-            inverseJoinColumns = @JoinColumn(name = "creationId"))
-    private List<Creation> creations;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<OrderCreation> orderCreations;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderProduct> orderProducts;
@@ -44,14 +40,15 @@ public class Order {
 
     private double total;
 
+    @Column(length = 500)
+    private String notes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "addressId")
+    private Address deliveryAddress;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cardId")
+    private Card paymentCard;
 
 }
-
-enum OrderStatus {
-    QUEUED,
-    PREPARING,
-    ON_THE_WAY,
-    DELIVERED,
-    CANCELLED,
-}
-

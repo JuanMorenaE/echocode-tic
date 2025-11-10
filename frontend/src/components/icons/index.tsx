@@ -41,6 +41,10 @@ import {
   XCircle,
   Info,
   Lock,
+  ClipboardText,
+  TagChevron,
+  Calendar,
+  Funnel
 } from '@phosphor-icons/react';
 
 interface IconProps {
@@ -370,4 +374,36 @@ export const LockIcon = ({
   weight = 'regular',
 }: IconProps) => {
   return <Lock size={size} className={className} weight={weight} />;
+};
+
+export const ClipboardTextIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <ClipboardText size={size} className={className} weight={weight} />;
+};
+
+export const TagChevronIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <TagChevron size={size} className={className} weight={weight} />;
+};
+
+export const CalendarIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <Calendar size={size} className={className} weight={weight} />;
+};
+
+export const FunnelIcon = ({
+  size = 24,
+  className = defaultTailwindCSS,
+  weight = 'regular',
+}: IconProps) => {
+  return <Funnel size={size} className={className} weight={weight} />;
 };

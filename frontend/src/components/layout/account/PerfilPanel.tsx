@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { PencilSimpleIcon } from '@/components/icons';
 import userApi from '@/services/api/userApi';
+import { useToast } from '@/context/ToastContext';
 
 const PerfilPanel: React.FC = () => {
   const { state, updateUser } = useAuth();
+  const { success, error } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -45,10 +47,10 @@ const PerfilPanel: React.FC = () => {
       });
 
       setIsEditing(false);
-      alert('Perfil actualizado correctamente');
-    } catch (error) {
-      console.error('Error al actualizar perfil:', error);
-      alert('Error al actualizar el perfil');
+      success('Perfil actualizado correctamente');
+    } catch (err) {
+      console.error('Error al actualizar perfil:', err);
+      error('Error al actualizar el perfil');
     } finally {
       setIsSaving(false);
     }

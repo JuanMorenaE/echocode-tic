@@ -7,7 +7,13 @@ import { CategoryAccordion } from './CategoryAccordion';
 import { CATEGORIAS_HAMBURGUESA, Ingrediente } from '@/types/ingrediente.types';
 import { StarIcon } from '@/components/icons';
 import { Category } from '@/types/category.types';
-import { SpinnerGapIcon, SpinnerIcon } from '@phosphor-icons/react';
+import { SpinnerGapIcon } from '@phosphor-icons/react';
+import useCart from '@/hooks/useCart';
+import useAuth from '@/hooks/useAuth';
+import type { CreacionCarrito } from '@/types/carrito.types';
+import { useToast } from '@/context/ToastContext';
+import api from '@/lib/axios/axiosConfig';
+import { AuthModal } from '@/components/auth/AuthModal';
 
 interface CrearHamburguesaModalProps {
   isOpen: boolean;
@@ -19,28 +25,34 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
   const [isFavorite, setIsFavorite] = useState(false);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [saving, setSaving] = useState<boolean>(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const { agregarCreacion } = useCart();
+  const { success, error: showError } = useToast();
+  const { state } = useAuth();
+  const isLoggedIn = !!state?.token;
 
   useEffect(() => {
     if (!isOpen) return;
 
+    // Si no está logueado, mostrar modal de autenticación
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setTotalPrice(0)
-  
+
     async function fetchData() {
       try {
         setLoading(true);
 
-        const response = await fetch('http://localhost:8080/api/v1/ingredients/type', {
-          headers: { "Content-Type": "application/json" },
-          method: 'POST',
-          body: JSON.stringify("BURGER")
-        });
-
-        if (!response.ok) throw new Error('Error en la respuesta');
-        const data: Ingrediente[] = await response.json();
+        const resp = await api.post<Ingrediente[]>('/v1/ingredients/type', "BURGER");
+        const data = resp.data;
 
         const grouped = data.reduce((accumulator, ingredient) => {
-          if (!accumulator[ingredient.category]) 
+          if (!accumulator[ingredient.category])
             accumulator[ingredient.category] = [];
 
           accumulator[ingredient.category].push(ingredient);
@@ -63,7 +75,7 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
         });
 
         list_categories.sort((a, b) => a.order - b.order)
-        
+
         setCategories(list_categories)
       } catch (error) {
         console.error(error);
@@ -71,29 +83,12 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
         setLoading(false)
       }
     }
-  
+
     fetchData();
-  }, [isOpen]);
+  }, [isOpen, isLoggedIn]);
 
   // TODO: Obtener ingredientes del backend
   const [ingredientes, setIngredientes] = useState<Ingrediente[]>([])
-  //   { id: 1, tipoProducto: 'HAMBURGUESA', nombre: 'Pan de Papa', categoria: 'PAN', precio: 60, cantidad: 1 },
-  //   { id: 2, tipoProducto: 'HAMBURGUESA', nombre: 'Pan Integral', categoria: 'PAN', precio: 70, cantidad: 1 },
-  //   { id: 3, tipoProducto: 'HAMBURGUESA', nombre: 'Pan Sin Gluten', categoria: 'PAN', precio: 90, cantidad: 1 },
-  //   { id: 4, tipoProducto: 'HAMBURGUESA', nombre: 'Carne de Vaca', categoria: 'CARNE', precio: 200, cantidad: 1 },
-  //   { id: 5, tipoProducto: 'HAMBURGUESA', nombre: 'Doble Carne de Vaca', categoria: 'CARNE', precio: 350, cantidad: 2 },
-  //   { id: 6, tipoProducto: 'HAMBURGUESA', nombre: 'Triple Carne de Vaca', categoria: 'CARNE', precio: 450, cantidad: 3 },
-  //   { id: 7, tipoProducto: 'HAMBURGUESA', nombre: 'Carne de Pollo', categoria: 'CARNE', precio: 180, cantidad: 1 },
-  //   { id: 8, tipoProducto: 'HAMBURGUESA', nombre: 'Salsa BBQ', categoria: 'ADEREZO', precio: 40, cantidad: 1 },
-  //   { id: 9, tipoProducto: 'HAMBURGUESA', nombre: 'Mayonesa', categoria: 'ADEREZO', precio: 30, cantidad: 1 },
-  //   { id: 10, tipoProducto: 'HAMBURGUESA', nombre: 'Mostaza', categoria: 'ADEREZO', precio: 30, cantidad: 1 },
-  //   { id: 11, tipoProducto: 'HAMBURGUESA', nombre: 'Ketchup', categoria: 'ADEREZO', precio: 30, cantidad: 1 },
-  //   { id: 12, tipoProducto: 'HAMBURGUESA', nombre: 'Lechuga', categoria: 'VEGETAL', precio: 20, cantidad: 1 },
-  //   { id: 13, tipoProducto: 'HAMBURGUESA', nombre: 'Tomate', categoria: 'VEGETAL', precio: 20, cantidad: 1 },
-  //   { id: 14, tipoProducto: 'HAMBURGUESA', nombre: 'Cebolla', categoria: 'VEGETAL', precio: 15, cantidad: 1 },
-  //   { id: 15, tipoProducto: 'HAMBURGUESA', nombre: 'Queso Cheddar', categoria: 'EXTRA', precio: 50, cantidad: 1 },
-  //   { id: 16, tipoProducto: 'HAMBURGUESA', nombre: 'Bacon', categoria: 'EXTRA', precio: 60, cantidad: 1 },
-  // ]);
 
   const calcularPrecio = () => {
     let total = 0
@@ -116,18 +111,85 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
     return required_categories.every(c => c.selected_ingredients.length > 0);
   }
 
-  const handleAgregar = () => {
-    // TODO: Agregar al carrito
-    const selected_ingredients = categories.flatMap(i => i.selected_ingredients);
-    console.log({
-      name: nombre,
-      isFavorite: isFavorite,
-      ingredients: selected_ingredients,
-      type: "BURGER"
-    });
-
-    onClose();
+  // Manejar el click en el botón de favorito
+  const handleFavoriteToggle = () => {
+    setIsFavorite(!isFavorite);
   };
+
+  const handleAgregar = async () => {
+    setSaving(true);
+    try {
+      // Obtener todos los ingredientes seleccionados
+      const ingredientesSeleccionados: Ingrediente[] = [];
+
+      categories.forEach(category => {
+        category.selected_ingredients.forEach(selectedId => {
+          const ingrediente = category.ingredients.find(i => i.id === selectedId);
+          if (ingrediente) {
+            ingredientesSeleccionados.push(ingrediente);
+          }
+        });
+      });
+
+      // Validar que haya ingredientes
+      if (ingredientesSeleccionados.length === 0) {
+        showError('Selecciona al menos un ingrediente antes de guardar la creación.');
+        setSaving(false);
+        return;
+      }
+
+      // Crear la creación para el carrito
+      const creacion: CreacionCarrito = {
+        tipo: 'HAMBURGUESA',
+        nombre: nombre.trim() || 'Mi Hamburguesa Personalizada',
+        ingredientes: ingredientesSeleccionados,
+        esFavorito: isFavorite,
+      };
+
+      // Agregar al carrito (CartContext se encarga de guardar en backend si está logueado)
+      agregarCreacion(creacion);
+
+      // Mostrar toast de confirmación
+      success(
+        isFavorite
+          ? '¡Hamburguesa agregada al carrito y a favoritos!'
+          : '¡Hamburguesa agregada al carrito!'
+      );
+
+      // Resetear el formulario
+      setNombre('');
+      setIsFavorite(false);
+      setCategories(prevCategories =>
+        prevCategories.map(cat => ({ ...cat, selected_ingredients: [] }))
+      );
+      setTotalPrice(0);
+
+      onClose();
+    } catch (error) {
+      console.error('Error al agregar hamburguesa:', error);
+      showError('Ocurrió un error al agregar la hamburguesa');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Si no está logueado, mostrar AuthModal
+  if (!isLoggedIn) {
+    return (
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+          onClose(); // Cerrar también el modal principal
+        }}
+        onSuccess={() => {
+          setShowAuthModal(false);
+          // El useEffect se encargará de cargar los datos cuando isLoggedIn cambie
+        }}
+        defaultTab="login"
+      />
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Crear Hamburguesa" size="lg">
@@ -143,7 +205,7 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
           />
         </div>
         <button
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={handleFavoriteToggle}
           className="ml-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
           title={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
@@ -207,9 +269,9 @@ export const CrearHamburguesaModal = ({ isOpen, onClose }: CrearHamburguesaModal
           <Button
             onClick={handleAgregar}
             className="flex-1"
-            disabled={!requiredCompleted()}
+            disabled={!requiredCompleted() || saving}
           >
-            Agregar al Carrito
+            {saving ? 'Guardando...' : 'Agregar al Carrito'}
           </Button>
         </div>
       </div>

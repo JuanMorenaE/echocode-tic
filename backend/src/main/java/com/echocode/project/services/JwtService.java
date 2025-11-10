@@ -37,14 +37,21 @@ public class JwtService {
     }
 
     /**
-     * Genera un token incluyendo claims extra y un userId opcional (inmutable) para evitar
-     * problemas cuando el usuario cambia su email.
+     * Genera un token incluyendo claims extra, userId opcional y role para autorización.
      */
-    public String generateToken(Map<String, Object> extraClaims, String email, Long userId) {
+    public String generateToken(Map<String, Object> extraClaims, String email, Long userId, String role) {
         if (userId != null) {
             extraClaims.put("userId", userId);
         }
+        if (role != null) {
+            extraClaims.put("role", role);
+        }
         return buildToken(extraClaims, email, jwtExpiration);
+    }
+
+    // Método legacy para compatibilidad
+    public String generateToken(Map<String, Object> extraClaims, String email, Long userId) {
+        return generateToken(extraClaims, email, userId, null);
     }
 
     private String buildToken(

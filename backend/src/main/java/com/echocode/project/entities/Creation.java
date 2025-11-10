@@ -17,6 +17,9 @@ public class Creation
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int creationId;
 
+    @Column(length = 100)
+    private String name;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ownerId")
     private Client owner;
@@ -27,10 +30,6 @@ public class Creation
     @Enumerated(EnumType.STRING)
     private CreationType creationType;
 
-    @ManyToOne
-    @JoinColumn(name = "id")
-    private PizzaSize pizzaSize;
-
     @ManyToMany
     @JoinTable(
         name = "creation_ingredients",
@@ -40,7 +39,3 @@ public class Creation
     private List<Ingredient> ingredients = new ArrayList<>();
 }
 
-enum CreationType {
-    BURGER,
-    PIZZA,
-}

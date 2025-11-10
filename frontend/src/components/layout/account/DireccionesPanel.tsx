@@ -2,26 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
 import { MapPinIcon, PlusIcon, TrashIcon, CheckCircleIcon } from '@/components/icons';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useToast } from '@/context/ToastContext';
 import addressApi from '@/services/api/addressApi';
+import DireccionModal from './DireccionModal';
 import type { Address, AddressRequest } from '@/types/address.types';
 
 const DireccionesPanel: React.FC = () => {
+  const { success, error } = useToast();
   const [direcciones, setDirecciones] = useState<Address[]>([]);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [nuevaDireccion, setNuevaDireccion] = useState<Partial<AddressRequest>>({
-    alias: '',
-    street: '',
-    number: '',
-    apartmentNumber: '',
-    city: '',
-    zipCode: '',
-    additionalInfo: '',
-    isDefault: false,
-  });
+  const [confirmDelete, setConfirmDelete] = useState<{ show: boolean; id: number | null }>({ show: false, id: null });
 
   // Cargar direcciones al montar el componente
   useEffect(() => {
@@ -33,67 +27,69 @@ const DireccionesPanel: React.FC = () => {
     try {
       const data = await addressApi.getAll();
       setDirecciones(data);
-    } catch (error) {
-      console.error('Error cargando direcciones:', error);
-      alert('Error al cargar las direcciones');
+    } catch (err) {
+      console.error('Error cargando direcciones:', err);
+      error('Error al cargar las direcciones');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleAgregarDireccion = async () => {
-    if (!nuevaDireccion.alias || !nuevaDireccion.street || !nuevaDireccion.number || !nuevaDireccion.city || !nuevaDireccion.zipCode) {
-      alert('Por favor completa los campos obligatorios (Alias, Calle, Número, Ciudad, Código Postal)');
-      return;
-    }
-
+  const handleAgregarDireccion = async (request: AddressRequest) => {
     setIsSaving(true);
     try {
-      const request: AddressRequest = {
-        alias: nuevaDireccion.alias!,
-        street: nuevaDireccion.street!,
-        number: nuevaDireccion.number!,
-        apartmentNumber: nuevaDireccion.apartmentNumber || '',
-        city: nuevaDireccion.city!,
-        zipCode: nuevaDireccion.zipCode!,
-        additionalInfo: nuevaDireccion.additionalInfo || '',
-        isDefault: nuevaDireccion.isDefault || false,
-      };
-
       await addressApi.create(request);
       await loadAddresses(); // Recargar lista
-
-      // Resetear formulario
-      setNuevaDireccion({
-        alias: '',
-        street: '',
-        number: '',
-        apartmentNumber: '',
-        city: '',
-        zipCode: '',
-        additionalInfo: '',
-        isDefault: false,
-      });
-      setMostrarFormulario(false);
-    } catch (error) {
-      console.error('Error creando dirección:', error);
-      alert('Error al guardar la dirección');
+      setMostrarModal(false);
+      success('Dirección agregada correctamente');
+    } catch (err) {
+      console.error('Error creando dirección:', err);
+      error('Error al guardar la dirección');
+      throw err; // Re-lanzar el error para que el modal lo maneje
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleEliminarDireccion = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar esta dirección?')) {
+  const handleEliminarDireccion = async () => {
+    if (confirmDelete.id === null) return;
+
+    // Verificar si es predeterminada antes de intentar eliminar
+    const direccion = direcciones.find(d => d.id === confirmDelete.id);
+    if (direccion?.isDefault) {
+      error('No puedes eliminar la dirección predeterminada. Marca otra como predeterminada primero.');
+      setConfirmDelete({ show: false, id: null });
       return;
     }
 
     try {
-      await addressApi.delete(id);
+      await addressApi.delete(confirmDelete.id);
       await loadAddresses(); // Recargar lista
-    } catch (error) {
-      console.error('Error eliminando dirección:', error);
-      alert('Error al eliminar la dirección');
+      success('Dirección eliminada correctamente');
+    } catch (err: any) {
+      console.error('Error eliminando dirección:', err);
+
+      // Manejo específico de errores de Axios
+      if (err.response) {
+        const status = err.response.status;
+        const message = err.response.data?.message || err.response.data?.error;
+
+        if (status === 404) {
+          error('La dirección no existe o ya fue eliminada');
+        } else if (status === 400 || status === 409) {
+          error(message || 'No se puede eliminar esta dirección');
+        } else if (status === 403) {
+          error('No tienes permisos para eliminar esta dirección');
+        } else {
+          error('Error al eliminar la dirección. Intenta nuevamente.');
+        }
+      } else if (err.request) {
+        error('Error de conexión. Verifica tu internet.');
+      } else {
+        error('Error inesperado al eliminar la dirección');
+      }
+    } finally {
+      setConfirmDelete({ show: false, id: null });
     }
   };
 
@@ -115,9 +111,10 @@ const DireccionesPanel: React.FC = () => {
 
       await addressApi.update(id, request);
       await loadAddresses(); // Recargar lista
-    } catch (error) {
-      console.error('Error marcando dirección como predeterminada:', error);
-      alert('Error al actualizar la dirección');
+      success('Dirección predeterminada actualizada');
+    } catch (err) {
+      console.error('Error marcando dirección como predeterminada:', err);
+      error('Error al actualizar la dirección');
     }
   };
 
@@ -134,82 +131,13 @@ const DireccionesPanel: React.FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">Mis Direcciones</h2>
         <Button
-          onClick={() => setMostrarFormulario(!mostrarFormulario)}
+          onClick={() => setMostrarModal(true)}
           className="flex items-center gap-2"
         >
           <PlusIcon size={20} />
           Nueva Dirección
         </Button>
       </div>
-
-      {/* Formulario para nueva dirección */}
-      {mostrarFormulario && (
-        <div className="bg-gray-50 p-6 rounded-lg space-y-4 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Agregar Dirección</h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Alias *"
-              placeholder="Ej: Casa, Trabajo"
-              value={nuevaDireccion.alias}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, alias: e.target.value })}
-            />
-
-            <Input
-              label="Calle *"
-              placeholder="Ej: Av. 18 de Julio"
-              value={nuevaDireccion.street}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, street: e.target.value })}
-            />
-
-            <Input
-              label="Número *"
-              placeholder="1234"
-              value={nuevaDireccion.number}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, number: e.target.value })}
-            />
-
-            <Input
-              label="Apartamento"
-              placeholder="301"
-              value={nuevaDireccion.apartmentNumber}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, apartmentNumber: e.target.value })}
-            />
-
-            <Input
-              label="Ciudad *"
-              placeholder="Montevideo"
-              value={nuevaDireccion.city}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, city: e.target.value })}
-            />
-
-            <Input
-              label="Código Postal *"
-              placeholder="11200"
-              value={nuevaDireccion.zipCode}
-              onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, zipCode: e.target.value })}
-            />
-
-            <div className="md:col-span-2">
-              <Input
-                label="Información adicional"
-                placeholder="Ej: Portón verde, Timbre 2"
-                value={nuevaDireccion.additionalInfo}
-                onChange={(e) => setNuevaDireccion({ ...nuevaDireccion, additionalInfo: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-3 justify-end pr-12 md:pr-16">
-            <Button variant="ghost" onClick={() => setMostrarFormulario(false)} disabled={isSaving}>
-              Cancelar
-            </Button>
-            <Button onClick={handleAgregarDireccion} isLoading={isSaving}>
-              Agregar
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Lista de direcciones */}
       <div className="space-y-4">
@@ -264,9 +192,14 @@ const DireccionesPanel: React.FC = () => {
                     </button>
                   )}
                   <button
-                    onClick={() => handleEliminarDireccion(direccion.id)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Eliminar"
+                    onClick={() => setConfirmDelete({ show: true, id: direccion.id })}
+                    disabled={direccion.isDefault}
+                    className={`p-2 rounded-lg transition-colors ${
+                      direccion.isDefault
+                        ? 'text-gray-300 cursor-not-allowed'
+                        : 'text-gray-600 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                    title={direccion.isDefault ? 'No puedes eliminar la dirección predeterminada' : 'Eliminar'}
                   >
                     <TrashIcon size={20} />
                   </button>
@@ -276,6 +209,26 @@ const DireccionesPanel: React.FC = () => {
           ))
         )}
       </div>
+
+      {/* Modal para agregar dirección */}
+      <DireccionModal
+        isOpen={mostrarModal}
+        onClose={() => setMostrarModal(false)}
+        onSubmit={handleAgregarDireccion}
+        isSaving={isSaving}
+      />
+
+      {/* Modal de confirmación para eliminar */}
+      <ConfirmDialog
+        isOpen={confirmDelete.show}
+        onClose={() => setConfirmDelete({ show: false, id: null })}
+        onConfirm={handleEliminarDireccion}
+        title="Eliminar dirección"
+        message="¿Estás seguro de que deseas eliminar esta dirección? Esta acción no se puede deshacer."
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   );
 };

@@ -6,11 +6,17 @@ import { UserIcon, ShoppingCartIcon, MagnifyingGlassIcon, PizzaIcon, HamburgerIc
 import UserMenu from './UserMenu';
 import { CrearHamburguesaModal } from '@/components/creacion/CrearHamburguesaModal';
 import { CrearPizzaModal } from '@/components/creacion/CrearPizzaModal';
+import { useCartContext } from '@/context/CartContext';
 
 export const Header = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isHamburguesaModalOpen, setIsHamburguesaModalOpen] = useState(false);
   const [isPizzaModalOpen, setIsPizzaModalOpen] = useState(false);
+  const { carrito } = useCartContext();
+
+  const handleOpenCart = () => {
+    window.dispatchEvent(new CustomEvent('openCart'));
+  };
 
   return (
     <header className="relative bg-gradient-to-br from-primary-600 to-primary-800 text-white overflow-hidden p-4">
@@ -35,11 +41,17 @@ export const Header = () => {
           {/* Iconos superiores */}
           <div className="flex gap-3 items-center">
             <UserMenu />
-            <Link href="/carrito">
-              <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform">
-                <ShoppingCartIcon size={20} className="text-primary-600" />
-              </button>
-            </Link>
+            <button
+              onClick={handleOpenCart}
+              className="relative w-10 h-10 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform"
+            >
+              <ShoppingCartIcon size={20} className="text-primary-600" />
+              {carrito.cantidadTotal > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">
+                  {carrito.cantidadTotal}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 

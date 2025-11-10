@@ -11,5 +11,7 @@ public interface CreationRepository extends JpaRepository<Creation, Integer> {
 
     public List<Creation> findAllByOwner_UserId(@NonNull Long ownerId);
 
+    public List<Creation> findAllByOwner_UserIdAndIsFavouriteTrue(@NonNull Long ownerId);
+
     public boolean existsByCreationId(@NonNull Integer creationId);
 }

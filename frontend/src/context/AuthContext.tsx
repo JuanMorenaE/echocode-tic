@@ -9,13 +9,15 @@ type AuthContextType = {
   login: (payload: LoginRequest) => Promise<void>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<AuthState["user"]>) => void; // 👈 nuevo
+  updateUser: (userData: Partial<AuthState["user"]>) => void;
+  isLoading: boolean; // 👈 nuevo - para saber si está cargando
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, setState] = useState<AuthState>({ token: null, user: null });
+  const [isLoading, setIsLoading] = useState(true); // 👈 nuevo - comienza en true
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -26,6 +28,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const phoneNumber = localStorage.getItem('phoneNumber');
       const cedula = localStorage.getItem('cedula');
       const birthdate = localStorage.getItem('birthdate');
+      const role = localStorage.getItem('role') as 'CLIENT' | 'ADMIN' | null;
+
       if (token) {
         setState({
           token,
@@ -36,14 +40,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phoneNumber: phoneNumber || undefined,
             cedula: cedula || undefined,
             birthdate: birthdate || undefined,
+            role: role || undefined,
           }
         });
       }
+
+      // Marcar como cargado después de leer el localStorage
+      setIsLoading(false);
     }
   }, []);
 
   const login = async (payload: LoginRequest) => {
     const res = await authApi.login(payload);
+    // console.log('Login response:', res);
+
     if (res.token) {
       localStorage.setItem('token', res.token);
       if (res.email) localStorage.setItem('email', res.email);
@@ -52,6 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.phoneNumber) localStorage.setItem('phoneNumber', res.phoneNumber);
       if (res.cedula) localStorage.setItem('cedula', res.cedula);
       if (res.birthdate) localStorage.setItem('birthdate', res.birthdate);
+      if (res.role) localStorage.setItem('role', res.role);
+
+      // console.log('Role guardado en localStorage:', res.role);
+
       setState({
         token: res.token,
         user: {
@@ -61,8 +75,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phoneNumber: res.phoneNumber,
           cedula: res.cedula,
           birthdate: res.birthdate,
+          role: res.role,
         }
       });
+
+      // console.log('State actualizado con role:', res.role);
     } else {
       throw new Error(res.message || 'Login failed');
     }
@@ -78,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.phoneNumber) localStorage.setItem('phoneNumber', res.phoneNumber);
       if (res.cedula) localStorage.setItem('cedula', res.cedula);
       if (res.birthdate) localStorage.setItem('birthdate', res.birthdate);
+      if (res.role) localStorage.setItem('role', res.role);
       setState({
         token: res.token,
         user: {
@@ -87,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phoneNumber: res.phoneNumber,
           cedula: res.cedula,
           birthdate: res.birthdate,
+          role: res.role,
         }
       });
     } else {
@@ -102,6 +121,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('phoneNumber');
     localStorage.removeItem('cedula');
     localStorage.removeItem('birthdate');
+    localStorage.removeItem('role');
     setState({ token: null, user: null });
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
@@ -136,7 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
   return (
-    <AuthContext.Provider value={{ state, login, register, logout, updateUser }}>
+    <AuthContext.Provider value={{ state, login, register, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

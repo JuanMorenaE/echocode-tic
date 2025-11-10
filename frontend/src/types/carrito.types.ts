@@ -3,8 +3,9 @@ import { Ingrediente } from './ingrediente.types';
 export type TipoItemCarrito = 'CREACION' | 'PRODUCTO';
 
 export interface CreacionCarrito {
+  id?: number; // ID de la creaci√≥n en el backend (solo para favoritos guardados)
   tipo: 'PIZZA' | 'HAMBURGUESA';
-  nombre?: string;
+  nombre: string;
   ingredientes: Ingrediente[];
   esFavorito: boolean;
 }
@@ -12,7 +13,7 @@ export interface CreacionCarrito {
 export interface ProductoCarrito {
   id: number;
   nombre: string;
-  tipo: 'ACOMPA—AMIENTO' | 'BEBIDA';
+  tipo: 'SIDE' | 'DRINK';
   precio: number;
   descripcion?: string;
 }

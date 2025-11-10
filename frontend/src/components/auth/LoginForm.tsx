@@ -46,15 +46,23 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Conectar con el backend
-      // const response = await authApi.login(formData);
-      // localStorage.setItem('token', response.token);
-      
-      // Simulación temporal
-  await login({ email: formData.email, password: formData.password });
-      router.push('/');
+      await login({ email: formData.email, password: formData.password });
+
+      // Esperar un momento para que el localStorage se actualice
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Verificar el role guardado en localStorage
+      const role = localStorage.getItem('role');
+      // console.log('Role after login:', role);
+
+      // Redirigir según el rol
+      if (role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
-  setErrors({ submit: (error as Error).message || 'Error al iniciar sesión. Verifica tus credenciales.' });
+      setErrors({ submit: (error as Error).message || 'Error al iniciar sesión. Verifica tus credenciales.' });
     } finally {
       setIsLoading(false);
     }
