@@ -17,6 +17,33 @@ export default function FuncionariosPage() {
   
   const [loading, setLoading] = useState<boolean>(false);
 
+    const [token, setToken] = useState<string>();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+  setLoading(true);
+  const resp = await api.get<Funcionario[]>('/v1/funcionarios');
+  const data = resp.data;
+
+  console.log(data);
+  setFuncionarios(data);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }finally{
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token') ?? "")
+  }, []);
+
   /**useEffect(() => {
     const fetchData = async () => {
       try{
