@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FuncionarioTable } from '@/components/admin/FuncionariosTable';
-import FuncionariosForm, { FuncionariosFormProps } from '@/components/admin/FuncionariosForm';
+import  FuncionariosForm from '@/components/admin/FuncionariosForm';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -17,7 +17,7 @@ export default function FuncionariosPage() {
   
   const [loading, setLoading] = useState<boolean>(false);
 
-    const [token, setToken] = useState<string>();
+  const [token, setToken] = useState<string>();
 
   useEffect(() => {
     const fetchData = async () => {
