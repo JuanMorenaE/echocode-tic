@@ -57,8 +57,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Nombre completo</th>
-              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Fecha de ingreso</th>
-              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Rol</th>
+              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Cédula</th>
               <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Email</th>
               <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Teléfono</th>
               <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Domicilio</th>
