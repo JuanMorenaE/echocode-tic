@@ -2,6 +2,7 @@ package com.echocode.project.services;
 
 import com.echocode.project.dto.AddressResponse;
 import com.echocode.project.dto.AdministratorRequest;
+import com.echocode.project.dto.FuncionarioRequest;
 import com.echocode.project.entities.Address;
 import com.echocode.project.entities.Administrator;
 import com.echocode.project.entities.User;
@@ -46,14 +47,14 @@ public class AdministratorService {
         return administratorRequests;
     }
 
-    public Administrator create(AdministratorRequest administratorRequest){
+    public Administrator create(FuncionarioRequest funcionarioRequest){
         Administrator administrator = Administrator.builder()
-                .document(administratorRequest.getDocument())
-                .firstName(administratorRequest.getFirstName())
-                .lastName(administratorRequest.getLastName())
-                .phoneNumber(administratorRequest.getPhoneNumber())
-                .email(administratorRequest.getEmail())
-                .passwordHash(passwordEncoder.encode(administratorRequest.getPassword()))
+                .document(funcionarioRequest.getDocument())
+                .firstName(funcionarioRequest.getFirstName())
+                .lastName(funcionarioRequest.getLastName())
+                .phoneNumber(funcionarioRequest.getPhoneNumber())
+                .email(funcionarioRequest.getEmail())
+                .passwordHash(passwordEncoder.encode(funcionarioRequest.getPassword()))
                 .build();
 
         return administratorRepository.save(administrator);

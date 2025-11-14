@@ -2,6 +2,7 @@ package com.echocode.project.controllers;
 
 import com.echocode.project.dto.AdministratorRequest;
 import com.echocode.project.dto.AuthResponse;
+import com.echocode.project.dto.FuncionarioRequest;
 import com.echocode.project.dto.UpdateProfileRequest;
 import com.echocode.project.entities.Administrator;
 import com.echocode.project.entities.Client;
@@ -41,10 +42,10 @@ public class AdministratorController {
     }
 
     @PostMapping("/create")
-    private ResponseEntity<Administrator> create(@AuthenticationPrincipal User user, AdministratorRequest administratorRequest) {
+    private ResponseEntity<Administrator> create(@AuthenticationPrincipal User user, FuncionarioRequest funcionarioRequest) {
         if (administratorRepository.getAdministratorByEmail((user.getEmail())).isEmpty())
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(administratorService.create(administratorRequest));
+        return ResponseEntity.status(HttpStatus.CREATED).body(administratorService.create(funcionarioRequest));
     }
 }
