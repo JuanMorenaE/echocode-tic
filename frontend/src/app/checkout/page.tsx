@@ -192,8 +192,10 @@ export default function CheckoutPage() {
 
       // Extraer IDs de creaciones
       const creationIds = creaciones
-        .map(i => i.creacion!.id!)
-        .filter(id => id !== undefined);
+        .map(i => ({
+          creationId: i.creacion!.id!,
+          quantity: i.cantidad
+        }))
 
       // Extraer productos con cantidad
       const products = carrito.items
