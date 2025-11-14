@@ -188,6 +188,8 @@ export default function CheckoutPage() {
         return;
       }
 
+      console.log(creaciones)
+
       // Extraer IDs de creaciones
       const creationIds = creaciones
         .map(i => i.creacion!.id!)

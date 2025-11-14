@@ -12,8 +12,13 @@ export interface OrderProductItem {
   quantity: number;
 }
 
+export interface OrderCreationItem {
+  creationId: number;
+  quantity: number;
+}
+
 export interface OrderRequest {
-  creationIds?: number[];
+  creationIds?: OrderCreationItem[];
   products?: OrderProductItem[];
   addressId?: number;
   cardId?: number;

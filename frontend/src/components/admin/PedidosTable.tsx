@@ -23,6 +23,8 @@ export const PedidosTable = ({ pedidos, onViewDetails }: PedidosTableProps) => {
 
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
 
+  pedidos.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div className="overflow-x-auto">

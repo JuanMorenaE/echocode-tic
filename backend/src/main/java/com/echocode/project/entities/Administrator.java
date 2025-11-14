@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @SuperBuilder
 @Getter @Setter
@@ -11,6 +14,6 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "administrators")
 public class Administrator extends User
 {
-    // Administrator no tiene campos adicionales por ahora
-    // Hereda todos los campos de User: id, hash, email, password, firstName, lastName, phoneNumber, cedula, dirección
+    @Column(insertable = false, updatable = false)
+    private LocalDateTime createdAt;
 }

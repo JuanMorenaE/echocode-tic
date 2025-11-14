@@ -1,5 +1,6 @@
 import api from '@/lib/axios/axiosConfig';
 import '@/lib/axios/interceptors';
+import { getToken, isLoggedIn } from '@/lib/utils/auth';
 
 export interface CreationRequestDTO {
   name: string;
@@ -31,7 +32,16 @@ const creationsApi = {
 
   async getFavorites(): Promise<CreationResponseDTO[]> {
     try {
-      const response = await api.get<CreationResponseDTO[]>('/v1/creations/favorites');
+      if(!isLoggedIn())
+        return [];
+
+      const response = await api.get<CreationResponseDTO[]>('/v1/creations/favorites', 
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
+      );
       return response.data;
     } catch (error: unknown) {
       const e = error as { response?: { data?: { message?: string } }; message?: string } | undefined;

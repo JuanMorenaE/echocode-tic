@@ -16,14 +16,25 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
     switch(tipo) {
       case "DRINK":
         return '🥤';
-        break;
 
       case "SIDE":
         return '🍟';
-        break;
 
       default:
         return '📦';
+    };
+  };
+
+  const getTipoLabel = (tipo: ProductType) => {
+    switch(tipo) {
+      case "DRINK":
+        return 'BEBIDA';
+
+      case "SIDE":
+        return 'ACOMPAÑAMIENTO';
+
+      default:
+        return 'OTRO';
     };
   };
 
@@ -64,8 +75,10 @@ export const ProductoTable = ({ productos, onEdit, onDelete }: ProductoTableProp
                     <span className="font-medium text-gray-900">{producto.name}</span>
                   </div>
                 </td>
-                <td className="py-4 px-6">
-                  {getTipoBadge(producto.type || 'SIDE')}
+                <td className={"py-4 px-6"}>
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTipoBadge(producto.type!)}`}>
+                    {getTipoLabel(producto.type!)}
+                    </span>
                 </td>
                 <td className="py-4 px-6 max-w-xs">
                   <p className="text-sm text-gray-600 truncate">{producto.description}</p>

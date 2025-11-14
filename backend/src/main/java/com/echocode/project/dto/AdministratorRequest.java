@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdministratorRequest {
+    private String document;
     private String firstName;
     private String lastName;
     private String email;
-    private String phone;
-    private LocalDateTime hireDate;
-    private String role;
-    private AddressResponse address;
+    private String phoneNumber;
+    private String password;
+    private String address;
 }

@@ -8,6 +8,7 @@ import com.echocode.project.entities.User;
 import com.echocode.project.repositories.AddressRepository;
 import com.echocode.project.repositories.AdministratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,6 +23,9 @@ public class AdministratorService {
     @Autowired
     private AddressService addressService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<AdministratorRequest> getAdministrators(User user){
         List<Administrator> administrators = administratorRepository.findAll();
         List<AdministratorRequest> administratorRequests = new ArrayList<>();
@@ -33,13 +37,25 @@ public class AdministratorService {
                             .firstName(administrator.getFirstName())
                             .lastName(administrator.getLastName())
                             .email(administrator.getEmail())
-                            .phone(administrator.getPhoneNumber())
-                            .role("Funcionario")
+                            .phoneNumber(administrator.getPhoneNumber())
                             .address(adminAddresses.getFirst())
                             .build()
             );
         }
 
         return administratorRequests;
+    }
+
+    public Administrator create(AdministratorRequest administratorRequest){
+        Administrator administrator = Administrator.builder()
+                .document(administratorRequest.getDocument())
+                .firstName(administratorRequest.getFirstName())
+                .lastName(administratorRequest.getLastName())
+                .phoneNumber(administratorRequest.getPhoneNumber())
+                .email(administratorRequest.getEmail())
+                .passwordHash(passwordEncoder.encode(administratorRequest.getPassword()))
+                .build();
+
+        return administratorRepository.save(administrator);
     }
 }
