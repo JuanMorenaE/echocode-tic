@@ -17,5 +17,5 @@ public class AdministratorRequest {
     private String email;
     private String phoneNumber;
     private String password;
-    private String address;
+    private AddressResponse address;
 }
