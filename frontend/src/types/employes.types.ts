@@ -1,13 +1,10 @@
 export interface Funcionario {
   id: number;
-  digital_id: number;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   phone_number: string;
-  date_of_birth: Date;
   email: string;
   password: string;
-  role: string;
-  date_of_entry: string;
   exist?: boolean;
   residence: string;
 
