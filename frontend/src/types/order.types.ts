@@ -18,7 +18,7 @@ export interface OrderCreationItem {
 }
 
 export interface OrderRequest {
-  creationIds?: OrderCreationItem[];
+  creations?: OrderCreationItem[];
   products?: OrderProductItem[];
   addressId?: number;
   cardId?: number;
@@ -32,6 +32,7 @@ export interface CreationResponse {
   isFavourite: boolean;
   ingredients: Ingrediente[];
   totalPrice: number;
+  quantity: number;
 }
 
 export interface OrderProductResponse {

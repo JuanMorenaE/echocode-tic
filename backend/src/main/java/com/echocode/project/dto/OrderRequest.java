@@ -5,7 +5,7 @@ import java.util.List;
 
 @Data
 public class OrderRequest {
-    private List<Integer> creationIds;
+    private List<OrderCreationItem> creations;
     private List<OrderProductItem> products;
     private Integer addressId;
     private Integer cardId;
@@ -14,6 +14,12 @@ public class OrderRequest {
     @Data
     public static class OrderProductItem {
         private Integer productId;
+        private Integer quantity;
+    }
+
+    @Data
+    public static class OrderCreationItem {
+        private Integer creationId;
         private Integer quantity;
     }
 }
