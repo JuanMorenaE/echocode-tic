@@ -16,4 +16,5 @@ public class CreationResponse {
     private boolean isFavourite;
     private List<Ingredient> ingredients;
     private double totalPrice;
+    private int quantity;
 }

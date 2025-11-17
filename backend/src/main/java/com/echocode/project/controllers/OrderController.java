@@ -40,7 +40,7 @@ public class OrderController {
         String email = authentication.getName();
         logger.info("createOrder called by {} with {} creations and {} products",
                 email,
-                request.getCreationIds() != null ? request.getCreationIds().size() : 0,
+                request.getCreations() != null ? request.getCreations().size() : 0,
                 request.getProducts() != null ? request.getProducts().size() : 0);
 
         OrderResponse response = orderService.createOrder(request, email);

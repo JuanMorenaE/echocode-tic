@@ -191,9 +191,11 @@ export default function CheckoutPage() {
       console.log(creaciones)
 
       // Extraer IDs de creaciones
-      const creationIds = creaciones
-        .map(i => i.creacion!.id!)
-        .filter(id => id !== undefined);
+      const creations = creaciones
+        .map(i => ({
+          creationId: i.creacion!.id!,
+          quantity: i.cantidad
+        }))
 
       // Extraer productos con cantidad
       const products = carrito.items
@@ -205,7 +207,7 @@ export default function CheckoutPage() {
 
       // Construir request
       const orderRequest: OrderRequest = {
-        creationIds: creationIds.length > 0 ? creationIds : undefined,
+        creations: creations.length > 0 ? creations : undefined,
         products: products.length > 0 ? products : undefined,
         addressId: selectedAddressId,
         cardId: selectedCardId,
@@ -213,7 +215,7 @@ export default function CheckoutPage() {
       };
 
       // Validar que haya al menos un item
-      if (!orderRequest.creationIds?.length && !orderRequest.products?.length) {
+      if (!orderRequest.creations?.length && !orderRequest.products?.length) {
         showError('El carrito está vacío');
         return;
       }

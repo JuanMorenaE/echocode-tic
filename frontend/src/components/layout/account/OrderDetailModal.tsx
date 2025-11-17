@@ -126,6 +126,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900">{creation.name}</h4>
+                      <p className="text-xs text-gray-500">Cantidad: {creation.quantity}</p>
                       <p className="text-xs text-gray-500 mt-1">
                         {creation.ingredients.length} ingredientes
                       </p>
@@ -145,7 +146,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({ isOpen, onClose, or
                         )}
                       </div>
                       <p className="text-sm font-bold text-gray-900 mt-2">
-                        {formatPrice(creation.totalPrice)}
+                        {formatPrice(creation.totalPrice * creation.quantity)}
                       </p>
                     </div>
                   </div>

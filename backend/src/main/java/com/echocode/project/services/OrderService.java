@@ -8,10 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.yaml.snakeyaml.util.Tuple;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -49,7 +51,7 @@ public class OrderService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
 
         // 2. Validar que haya al menos un item en el pedido
-        boolean hasCreations = request.getCreationIds() != null && !request.getCreationIds().isEmpty();
+        boolean hasCreations = request.getCreations() != null && !request.getCreations().isEmpty();
         boolean hasProducts = request.getProducts() != null && !request.getProducts().isEmpty();
 
         if (!hasCreations && !hasProducts) {
@@ -80,33 +82,36 @@ public class OrderService {
             }
         }
 
-        // 5. Obtener las creaciones y validar que pertenezcan al cliente
-        List<Creation> creations = new ArrayList<>();
-        if (hasCreations) {
-            creations = creationRepository.findAllById(request.getCreationIds());
+        // 5. Calcular el total del pedido
+        double total = 0.0;
 
-            if (creations.size() != request.getCreationIds().size()) {
+        // 6. Obtener las creaciones y validar que pertenezcan al cliente
+        List<Tuple<Creation, Integer>> creations = new ArrayList<>();
+        if (hasCreations) {
+            for (OrderRequest.OrderCreationItem item : request.getCreations()) {
+                Creation creation = creationRepository.findById(item.getCreationId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                "Creation with ID " + item.getCreationId() + " not found"));
+
+                creations.add(new Tuple<>(creation, item.getQuantity()));
+
+                total += creation.getIngredients().stream()
+                        .mapToDouble(Ingredient::getPrice)
+                        .sum() * item.getQuantity();
+            }
+
+
+            if (creations.size() != request.getCreations().size()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Some creations were not found");
             }
 
             // Validar que todas las creaciones pertenezcan al cliente
-            for (Creation creation : creations) {
-                if (creation.getOwner() == null || creation.getOwner().getUserId() != client.getUserId()) {
+            for (Tuple<Creation, Integer> creation : creations) {
+                if (creation._1().getOwner() == null || creation._1().getOwner().getUserId() != client.getUserId()) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "Creation " + creation.getCreationId() + " does not belong to the client");
+                        "Creation " + creation._1().getCreationId() + " does not belong to the client");
                 }
             }
-        }
-
-        // 6. Calcular el total del pedido
-        double total = 0.0;
-
-        // Calcular total de creaciones (sumando precios de ingredientes)
-        for (Creation creation : creations) {
-            double creationPrice = creation.getIngredients().stream()
-                    .mapToDouble(Ingredient::getPrice)
-                    .sum();
-            total += creationPrice;
         }
 
         // Calcular total de productos
@@ -143,11 +148,11 @@ public class OrderService {
         // 8. Crear los OrderCreations (creaciones con cantidad)
         List<OrderCreation> orderCreations = new ArrayList<>();
         if (hasCreations) {
-            for (Creation creation : creations) {
+            for (Tuple<Creation, Integer> creation : creations) {
                 OrderCreation orderCreation = OrderCreation.builder()
                         .order(savedOrder)
-                        .creation(creation)
-                        .quantity(1) // Por ahora cada creación tiene cantidad 1
+                        .creation(creation._1())
+                        .quantity(creation._2())
                         .build();
 
                 orderCreations.add(orderCreation);
@@ -281,7 +286,7 @@ public class OrderService {
     private OrderResponse buildOrderResponse(Order order, List<OrderCreation> orderCreations, List<OrderProduct> orderProducts) {
         // Mapear creaciones
         List<CreationResponse> creationResponses = orderCreations.stream()
-                .map(oc -> mapCreationToResponse(oc.getCreation()))
+                .map(oc -> mapCreationToResponse(oc))
                 .collect(Collectors.toList());
 
         // Mapear productos
@@ -345,17 +350,18 @@ public class OrderService {
                 .build();
     }
 
-    private CreationResponse mapCreationToResponse(Creation creation) {
-        double totalPrice = creation.getIngredients().stream()
+    private CreationResponse mapCreationToResponse(OrderCreation creation) {
+        double totalPrice = creation.getCreation().getIngredients().stream()
                 .mapToDouble(Ingredient::getPrice)
                 .sum();
 
         return CreationResponse.builder()
-                .creationId(creation.getCreationId())
-                .name(creation.getName())
-                .creationType(creation.getCreationType().name())
-                .isFavourite(creation.isFavourite())
-                .ingredients(creation.getIngredients())
+                .creationId(creation.getCreation().getCreationId())
+                .name(creation.getCreation().getName())
+                .creationType(creation.getCreation().getCreationType().name())
+                .isFavourite(creation.getCreation().isFavourite())
+                .ingredients(creation.getCreation().getIngredients())
+                .quantity(creation.getQuantity())
                 .totalPrice(totalPrice)
                 .build();
     }
