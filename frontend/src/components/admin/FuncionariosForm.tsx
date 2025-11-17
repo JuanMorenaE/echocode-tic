@@ -32,6 +32,11 @@ export default function FuncionariosForm({
         placeholder="Nombre completo"
       />
        <input
+        value={[form.document ?? '']}
+        onChange={e => setForm(f => ({ ...f, document: e.target.value }))}
+        placeholder="Cédula"
+      />
+       <input
         value={[form.email ?? '']}
         onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
         placeholder="Email"

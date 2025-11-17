@@ -79,6 +79,7 @@ export default function FuncionariosPage() {
     isOpen: false,
   });
 
+<<<<<<< HEAD
   const handleCreateFuncionario = async (data: Funcionario) => {
     const { id, ...newFuncionario } = data;
 
@@ -96,6 +97,25 @@ export default function FuncionariosPage() {
       error("Ocurrio un error inesperado, contacta a un administrador.")
     }
   };
+=======
+    const handleCreateFuncionario = async (data: Funcionario) => {
+      const { id, ...newFuncionario} = data;
+  
+      console.log(newFuncionario)
+      
+      try{
+        const resp = await api.post('/v1/administrator/create', newFuncionario);
+        const created = resp.data;
+  
+        setFuncionarios([...funcionarios, created]);
+        setIsModalOpen(false);
+        success(`Funcionario "${created.firstName}" creado exitosamente`);
+      }catch(ex){
+        console.error(ex)
+        error("Ocurrio un error inesperado, contacta a un administrador.")
+      }
+    };
+>>>>>>> 56409f0b31ce35cdd2cd7460a3fa45e183df9c47
 
   /**const handleCreateFuncionario = async (data: Funcionario) => {
     const { id, ...newFuncionario} = data;
