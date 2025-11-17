@@ -27,19 +27,22 @@ public class AdministratorService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public List<AdministratorRequest> getAdministrators(User user){
+    public List<AdministratorRequest> getAdministrators(){
         List<Administrator> administrators = administratorRepository.findAll();
         List<AdministratorRequest> administratorRequests = new ArrayList<>();
 
         for(Administrator administrator : administrators){
             List<AddressResponse> adminAddresses = addressService.getAllAddressesByUser(administrator.getUserId());
+            AddressResponse address = adminAddresses.isEmpty() ? null : adminAddresses.getFirst();
+
             administratorRequests.add(
                     AdministratorRequest.builder()
+                            .document(administrator.getDocument())
                             .firstName(administrator.getFirstName())
                             .lastName(administrator.getLastName())
                             .email(administrator.getEmail())
                             .phoneNumber(administrator.getPhoneNumber())
-                            .address(adminAddresses.getFirst())
+                            .address(address)
                             .build()
             );
         }
