@@ -12,7 +12,7 @@ export interface FuncionariosFormProps {
   onCancel: () => void;
 }
 
-export const ProductoForm = ({ funcionario, onSubmit, onCancel }: FuncionariosFormProps) => {
+export const FuncionariosForm = ({ funcionario, onSubmit, onCancel }: FuncionariosFormProps) => {
   const [formData, setFormData] = useState({
     name: funcionario?.firstName || '',
     document: funcionario?.document?.toString() || '',

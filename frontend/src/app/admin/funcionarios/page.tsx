@@ -73,9 +73,9 @@ export default function FuncionariosPage() {
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | undefined>();
+  const [editingFuncionario, setEditingFuncionario] = useState<FuncionarioDto | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; funcionario?: Funcionario }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; funcionario?: FuncionarioDto }>({
     isOpen: false,
   });
 
@@ -167,7 +167,7 @@ export default function FuncionariosPage() {
     }
   };/** */
 
-  const openDeleteConfirm = (funcionario: Funcionario) => {
+  const openDeleteConfirm = (funcionario: FuncionarioDto) => {
     setDeleteConfirm({ isOpen: true, funcionario });
   };
 
@@ -191,7 +191,7 @@ export default function FuncionariosPage() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (funcionario: Funcionario) => {
+  const openEditModal = (funcionario: FuncionarioDto) => {
     setEditingFuncionario(funcionario);
     setIsModalOpen(true);
   };
@@ -253,7 +253,7 @@ export default function FuncionariosPage() {
         size="lg"
       >
         <FuncionariosForm
-          funcionario={editingFuncionario}
+          funcionario={editingFuncionario as Funcionario | undefined}
           onSubmit={editingFuncionario ? handleEditFuncionario : handleCreateFuncionario}
           onCancel={() => setIsModalOpen(false)}
         />
