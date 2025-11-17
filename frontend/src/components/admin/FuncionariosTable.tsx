@@ -70,7 +70,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
                     </div>
-                    <span className="font-medium text-gray-900">{funcionario.full_name}</span>
+                    <span className="font-medium text-gray-900">{funcionario.firstName}</span>
                   </div>
                 </td>
                 <td className="py-4 px-6">
@@ -79,7 +79,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
                   <p className="text-sm text-gray-600 truncate">{funcionario.email}</p>
                 </td>
                 <td className="py-4 px-6 text-right font-semibold text-gray-900">
-                    {funcionario.phone_number}
+                    {funcionario.phoneNumber}
                 </td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-center gap-2">
