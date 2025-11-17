@@ -1,14 +1,15 @@
 'use client';
 
-import { Funcionario } from '@/types/employes.types';
+import { Funcionario, FuncionarioDto } from '@/types/employes.types';
 import { Button } from '@/components/ui/Button';
 import { useEffect } from 'react';
 import { PencilSimpleIcon, TrashIcon } from '@/components/icons';
+import { UserIcon } from '@phosphor-icons/react';
 
 interface FuncionarioTableProps {
-  funcionarios: Funcionario[];
-  onEdit: (funcionario: Funcionario) => void;
-  onDelete: (funcionario: Funcionario) => void; // ← Cambiar de "id: number" a "funcionario: Funcionario"
+  funcionarios: FuncionarioDto[];
+  onEdit: (funcionario: FuncionarioDto) => void;
+  onDelete: (funcionario: FuncionarioDto) => void; // ← Cambiar de "id: number" a "funcionario: Funcionario"
 }
 
 export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: FuncionarioTableProps) => {
@@ -58,9 +59,10 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
             <tr>
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Nombre completo</th>
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Cédula</th>
-              <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Email</th>
-              <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Teléfono</th>
-              <th className="text-right py-4 px-6 text-sm font-semibold text-gray-700">Domicilio</th>
+              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Email</th>
+              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Teléfono</th>
+              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Domicilio</th>
+              <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -69,11 +71,13 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
+                      <UserIcon className='text-primary-500'/>
                     </div>
                     <span className="font-medium text-gray-900">{funcionario.firstName}</span>
                   </div>
                 </td>
-                <td className="py-4 px-6">
+                <td className="py-4 px-6 text-sm">
+                  {funcionario.document}
                 </td>
                 <td className="py-4 px-6 max-w-xs">
                   <p className="text-sm text-gray-600 truncate">{funcionario.email}</p>
@@ -81,6 +85,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
                 <td className="py-4 px-6 text-right font-semibold text-gray-900">
                     {funcionario.phoneNumber}
                 </td>
+                <td></td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-center gap-2">
                     <Button

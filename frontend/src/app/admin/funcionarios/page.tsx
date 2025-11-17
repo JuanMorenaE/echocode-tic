@@ -7,31 +7,36 @@ import { AdminHeader } from '@/components/admin/AdminHeader';
 import { Modal } from '@/components/ui/Modal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { PlusIcon, MagnifyingGlassIcon } from '@/components/icons';
-import { Funcionario } from '@/types/employes.types';
+import { Funcionario, FuncionarioDto } from '@/types/employes.types';
 import { useToast } from '@/context/ToastContext';
 import { SpinnerGapIcon } from '@phosphor-icons/react';
 import api from '@/lib/axios/interceptors';
+import { getToken } from '@/lib/utils/auth';
 
 export default function FuncionariosPage() {
   const { success, error } = useToast();
-  
+
   const [loading, setLoading] = useState<boolean>(true);
 
   const [token, setToken] = useState<string>();
 
   useEffect(() => {
     const fetchData = async () => {
-      try{
-  setLoading(true);
-  const resp = await api.get<Funcionario[]>('/v1/funcionarios');
-  const data = resp.data;
+      try {
+        setLoading(true);
+        const resp = await api.get<FuncionarioDto[]>('/v1/administrator', {
+          headers: {
+            Authorization: "Bearer " + getToken(),
+          }
+        });
+        const data = resp.data;
 
-  console.log(data);
-  setFuncionarios(data);
-      }catch(ex){
+        console.log(data);
+        setFuncionarios(data);
+      } catch (ex) {
         console.error(ex)
         error("Ocurrio un error inesperado, contacta a un administrador.")
-      }finally{
+      } finally {
         setLoading(false)
       }
     }
@@ -64,7 +69,7 @@ export default function FuncionariosPage() {
     fetchData()
   }, [])/** */
 
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([
+  const [funcionarios, setFuncionarios] = useState<FuncionarioDto[]>([
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -133,14 +138,14 @@ export default function FuncionariosPage() {
   
   */
 
-   const handleEditFuncionario = async (data: Funcionario) => {
+  const handleEditFuncionario = async (data: Funcionario) => {
     try {
       const { id, ...updateData } = data;
       await api.put(`/v1/funcionarios/${id}`, updateData);
 
-      setFuncionarios(funcionarios.map(f =>
-        f.id === id ? data : f
-      ));
+      // setFuncionarios(funcionarios.map(f =>
+      //   f.id === id ? data : f
+      // ));
       setIsModalOpen(false);
       setEditingFuncionario(undefined);
       success(`Funcionario "${data.firstName}" actualizado exitosamente`);
@@ -162,24 +167,24 @@ export default function FuncionariosPage() {
     }
   };/** */
 
-    const openDeleteConfirm = (funcionario: Funcionario) => {
-      setDeleteConfirm({ isOpen: true, funcionario });
-    };
-  
-    const handleDeleteFuncionario = async () => {
-      if (deleteConfirm.funcionario) {
-        try {
-          await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
-  
-          setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
-          success(`Funcionario "${deleteConfirm.funcionario.firstName}" eliminado exitosamente`);
-          setDeleteConfirm({ isOpen: false });
-        } catch (ex) {
-          console.error(ex);
-          error("Ocurrió un error al eliminar el funcionario.");
-        }
+  const openDeleteConfirm = (funcionario: Funcionario) => {
+    setDeleteConfirm({ isOpen: true, funcionario });
+  };
+
+  const handleDeleteFuncionario = async () => {
+    if (deleteConfirm.funcionario) {
+      try {
+        await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
+
+        setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
+        success(`Funcionario "${deleteConfirm.funcionario.firstName}" eliminado exitosamente`);
+        setDeleteConfirm({ isOpen: false });
+      } catch (ex) {
+        console.error(ex);
+        error("Ocurrió un error al eliminar el funcionario.");
       }
-    };
+    }
+  };
 
   const openCreateModal = () => {
     setEditingFuncionario(undefined);
@@ -225,7 +230,7 @@ export default function FuncionariosPage() {
       {
         loading && (
           <div className='py-8 flex justify-center items-center text-center'>
-            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500'/>
+            <SpinnerGapIcon className='w-10 h-10 animate-spin text-gray-500' />
           </div>
         )
       }

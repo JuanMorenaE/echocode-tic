@@ -17,4 +17,14 @@ export interface Funcionario {
   }; /**/
 }
 
+export interface FuncionarioDto {
+  id: number;
+  document: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+}
+
 /**export type ProductCategory = 'hamburguesas' | 'pizzas' | 'acompañamientos' | 'bebidas';**/

@@ -37,8 +37,8 @@ public class AdministratorController {
     private AdministratorRepository administratorRepository;
 
     @GetMapping
-    private ResponseEntity<List<AdministratorRequest>> getAll(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok().body(administratorService.getAdministrators(user));
+    private ResponseEntity<List<AdministratorRequest>> getAll() {
+        return ResponseEntity.ok().body(administratorService.getAdministrators());
     }
 
     @PostMapping("/create")
