@@ -80,12 +80,12 @@ export default function FuncionariosPage() {
       console.log(newFuncionario)
       
       try{
-        const resp = await api.post('/v1/funcionarios', newFuncionario);
+        const resp = await api.post('/v1/administrator/create', newFuncionario);
         const created = resp.data;
   
         setFuncionarios([...funcionarios, created]);
         setIsModalOpen(false);
-        success(`Funcionario "${created.full_name}" creado exitosamente`);
+        success(`Funcionario "${created.firstName}" creado exitosamente`);
       }catch(ex){
         console.error(ex)
         error("Ocurrio un error inesperado, contacta a un administrador.")
@@ -143,7 +143,7 @@ export default function FuncionariosPage() {
       ));
       setIsModalOpen(false);
       setEditingFuncionario(undefined);
-      success(`Funcionario "${data.full_name}" actualizado exitosamente`);
+      success(`Funcionario "${data.firstName}" actualizado exitosamente`);
     } catch (ex) {
       console.error(ex);
       error("Ocurrió un error al actualizar el funcionario.");
@@ -172,7 +172,7 @@ export default function FuncionariosPage() {
           await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
   
           setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
-          success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
+          success(`Funcionario "${deleteConfirm.funcionario.firstName}" eliminado exitosamente`);
           setDeleteConfirm({ isOpen: false });
         } catch (ex) {
           console.error(ex);
@@ -192,7 +192,7 @@ export default function FuncionariosPage() {
   };
 
   const filteredFuncionarios = funcionarios.filter(f =>
-    f.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    f.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     f.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -260,7 +260,7 @@ export default function FuncionariosPage() {
         onClose={() => setDeleteConfirm({ isOpen: false })}
         onConfirm={handleDeleteFuncionario}
         title="¿Eliminar funcionario?"
-        message={`Estás a punto de eliminar "${deleteConfirm.funcionario?.full_name}". Esta acción no se puede deshacer.`}
+        message={`Estás a punto de eliminar "${deleteConfirm.funcionario?.firstName}". Esta acción no se puede deshacer.`}
         confirmText="Sí, eliminar"
         cancelText="Cancelar"
         type="danger"

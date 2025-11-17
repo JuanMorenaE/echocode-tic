@@ -43,8 +43,8 @@ public class AdministratorController {
 
     @PostMapping("/create")
     private ResponseEntity<Administrator> create(@AuthenticationPrincipal User user, FuncionarioRequest funcionarioRequest) {
-        if (administratorRepository.getAdministratorByEmail((user.getEmail())).isEmpty())
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        if (administratorRepository.getAdministratorByEmail((user.getEmail())).isEmpty())
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         return ResponseEntity.status(HttpStatus.CREATED).body(administratorService.create(funcionarioRequest));
     }

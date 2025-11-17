@@ -6,6 +6,7 @@ export interface Funcionario {
   email: string;
   password: string;
   address: string;
+  document: string;
 
   
 
