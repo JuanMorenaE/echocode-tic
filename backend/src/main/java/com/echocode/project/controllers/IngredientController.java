@@ -2,12 +2,14 @@ package com.echocode.project.controllers;
 
 import com.echocode.project.dto.AddressResponse;
 import com.echocode.project.entities.Ingredient;
+import com.echocode.project.entities.User;
 import com.echocode.project.enums.IngredientType;
 import com.echocode.project.services.IngredientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,9 +40,16 @@ public class IngredientController {
         return ResponseEntity.ok(createdIngredient);
     }
 
-    @PutMapping
-    public ResponseEntity<Ingredient> update(@RequestBody Ingredient ingredient) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Ingredient> update(@PathVariable Long id, @RequestBody Ingredient ingredient) {
+        ingredient.setId(id);
         Ingredient updatedIngredient = ingredientService.update(ingredient);
         return ResponseEntity.ok(updatedIngredient);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        ingredientService.delete(id, user);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -2,6 +2,7 @@ package com.echocode.project.services;
 
 import com.echocode.project.entities.Category;
 import com.echocode.project.entities.Ingredient;
+import com.echocode.project.entities.User;
 import com.echocode.project.enums.IngredientType;
 import com.echocode.project.repositories.IngredientRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -35,5 +37,13 @@ public class IngredientService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient not found.");
 
         return ingredientRepository.save(ingredient);
+    }
+
+    public void delete(Long id, User user) {
+        Ingredient ingredient = ingredientRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient not found."));
+
+        // Hard delete
+        ingredientRepository.delete(ingredient);
     }
 }

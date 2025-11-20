@@ -33,14 +33,11 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product delete(Product product, User user) {
-        if(!productRepository.existsById(product.getId()))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found.");
+    public void delete(Long id, User user) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found."));
 
-        // Verificar que el user es Admin.
-
-        product.setDeletedAt(LocalDateTime.now());
-
-        return productRepository.save(product);
+        // Hard delete
+        productRepository.delete(product);
     }
 }

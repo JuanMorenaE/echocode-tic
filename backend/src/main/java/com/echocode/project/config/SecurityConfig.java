@@ -3,6 +3,7 @@ package com.echocode.project.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -21,8 +22,15 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final ApiKeyAuthenticationFilter apiKeyAuthFilter;
+
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthFilter,
+            @Lazy ApiKeyAuthenticationFilter apiKeyAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,19 +38,48 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configure(http))
                 .authorizeHttpRequests(auth -> auth
+                        // Auth endpoints - public
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/categories/**").permitAll()
-                        .requestMatchers("/api/v1/ingredients/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/addresses/**").permitAll()
-                        .requestMatchers("/api/v1/administrator/**").permitAll()
-                        .requestMatchers("/api/v1/products/**").permitAll()
-                        .requestMatchers("/api/v1/creations/**").permitAll()
+
+                        // Setup endpoints - public (TEMPORARY - remove in production)
+                        .requestMatchers("/api/v1/setup/**").permitAll()
+
+                        // External API endpoints - authenticated via API key (handled by ApiKeyAuthenticationFilter)
+                        .requestMatchers("/api/v1/external/**").permitAll()
+
+                        // Categories - public read, authenticated write
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").authenticated()
+
+                        // Ingredients - public read for browse, authenticated write
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ingredients/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/ingredients/type").permitAll()
+                        .requestMatchers("/api/v1/ingredients/**").authenticated()
+
+                        // Products - public read, authenticated write
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                        .requestMatchers("/api/v1/products/**").authenticated()
+
+                        // Creations - require authentication (users create their own)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/creations/**").permitAll()
+                        .requestMatchers("/api/v1/creations/**").authenticated()
+
+                        // Addresses, Cards, Orders - require authentication
+                        .requestMatchers("/api/v1/addresses/**").authenticated()
+                        .requestMatchers("/api/v1/cards/**").authenticated()
+                        .requestMatchers("/api/v1/orders/**").authenticated()
+                        .requestMatchers("/api/v1/users/**").authenticated()
+
+                        // Admin endpoints - require authentication (role check in controller)
+                        .requestMatchers("/api/v1/admin/**").authenticated()
+                        .requestMatchers("/api/v1/administrator/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

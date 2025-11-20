@@ -5,26 +5,15 @@ export interface Funcionario {
   phoneNumber: string;
   email: string;
   password: string;
-  address: string;
   document: string;
-
-  
-
-  /**tipo?: string;
-  badge?: {
-    text: string;
-    color: string;
-  }; /**/
 }
 
 export interface FuncionarioDto {
-  id: number;
+  userId: number;
   document: string;
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
-  address: string;
+  createdAt?: string;
 }
-
-/**export type ProductCategory = 'hamburguesas' | 'pizzas' | 'acompañamientos' | 'bebidas';**/

@@ -61,31 +61,29 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Cédula</th>
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Email</th>
               <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Teléfono</th>
-              <th className="text-left py-4 px-6 text-sm font-semibold text-gray-700">Domicilio</th>
               <th className="text-center py-4 px-6 text-sm font-semibold text-gray-700">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {funcionarios.map((funcionario) => (
-              <tr key={funcionario.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={funcionario.userId} className="hover:bg-gray-50 transition-colors">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
                       <UserIcon className='text-primary-500'/>
                     </div>
-                    <span className="font-medium text-gray-900">{funcionario.firstName}</span>
+                    <span className="font-medium text-gray-900">{funcionario.firstName} {funcionario.lastName}</span>
                   </div>
                 </td>
-                <td className="py-4 px-6 text-sm">
+                <td className="py-4 px-6 text-sm text-gray-700">
                   {funcionario.document}
                 </td>
                 <td className="py-4 px-6 max-w-xs">
                   <p className="text-sm text-gray-600 truncate">{funcionario.email}</p>
                 </td>
-                <td className="py-4 px-6 text-right font-semibold text-gray-900">
+                <td className="py-4 px-6 text-gray-900">
                     {funcionario.phoneNumber}
                 </td>
-                <td></td>
                 <td className="py-4 px-6">
                   <div className="flex items-center justify-center gap-2">
                     <Button
@@ -99,7 +97,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onDelete(funcionario)} // ← Pasar el funcionario completo
+                      onClick={() => onDelete(funcionario)}
                       className="text-red-600 hover:bg-red-50"
                     >
                       <TrashIcon size={18} />

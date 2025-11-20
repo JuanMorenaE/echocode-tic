@@ -41,11 +41,6 @@ const menuItems = [
     href: '/admin/funcionarios',
     icon: UsersIcon,
   },
-  {
-    name: 'Reportes',
-    href: '/admin/reportes',
-    icon: FileTextIcon,
-  },
 ];
 
 export const AdminSidebar = () => {

@@ -11,6 +11,6 @@ import java.util.List;
 public class CreationRequest {
     private String name;
     private String creationType; // "BURGER" o "PIZZA"
-    private Boolean isFavourite; // Usar Boolean (wrapper) en lugar de boolean primitivo
+    private Boolean isFavourite;
     private List<Long> ingredientIds;
 }

@@ -36,9 +36,9 @@ public class ProductController {
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @DeleteMapping
-    public ResponseEntity<Product> delete(@RequestBody Product product, @AuthenticationPrincipal User user) {
-        Product deletedProduct = productService.delete(product, user);
-        return ResponseEntity.ok(deletedProduct);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        productService.delete(id, user);
+        return ResponseEntity.noContent().build();
     }
 }
