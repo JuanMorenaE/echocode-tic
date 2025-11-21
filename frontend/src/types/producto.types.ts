@@ -3,7 +3,7 @@ export interface Producto {
   name: string;
   price: number;
   description: string;
-  type?: ProductType;
+  type: ProductType;
   category?: string;
   available: boolean;
   imageUrl?: string;

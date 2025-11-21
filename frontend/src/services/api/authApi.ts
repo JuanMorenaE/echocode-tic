@@ -35,7 +35,9 @@ const authApi = {
 				const status = error.response?.status;
 				const message = error.response?.data?.message;
 
-				if (status === 409 || (message && message.toLowerCase().includes('already exists'))) {
+				if (message && message.toLowerCase().includes('Email already registered')) {
+					throw new Error('Este email ya está registrado');
+				} else if (message && message.toLowerCase().includes('Document already registered')) {
 					throw new Error('Este email ya está registrado');
 				} else if (status === 400) {
 					throw new Error(message || 'Datos inválidos. Verifica el formulario.');

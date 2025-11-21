@@ -6,10 +6,11 @@ export interface Funcionario {
   email: string;
   password: string;
   document: string;
+  address: string;
 }
 
 export interface FuncionarioDto {
-  userId: number;
+  id: number;
   document: string;
   firstName: string;
   lastName: string;

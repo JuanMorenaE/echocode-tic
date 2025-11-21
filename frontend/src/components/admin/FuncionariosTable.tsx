@@ -13,43 +13,10 @@ interface FuncionarioTableProps {
 }
 
 export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: FuncionarioTableProps) => {
-  /**const getTipoIcon = (tipo: string) => {
-    switch(tipo) {
-      case "PIZZA":
-        return <PizzaIcon size={24} weight="fill" className="text-primary-600" />;
-        break;
-
-      case "BURGER":
-        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
-        break;
-
-      case "BURGER":
-        return <HamburgerIcon size={24} weight="fill" className="text-primary-600" />;
-        break;
-
-      default:
-        return '📦';
-    };/** */
 
    useEffect(() => {
     console.log(funcionarios)
   }, [])
-
-
-  /*const getTipoBadge = (tipo: EmployeType) => {
-    const colors: Record<string, string> = {
-      PIZZA: 'bg-red-100 text-red-800',
-      HAMBURGUESA: 'bg-orange-100 text-orange-800',
-      ACOMPAÑAMIENTO: 'bg-yellow-100 text-yellow-800',
-      BEBIDA: 'bg-blue-100 text-blue-800',
-    };/** */
-
-    /*return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${colors[tipo] || 'bg-gray-100 text-gray-800'}`}>
-        {tipo}
-      </span>
-    );
-  };/** */
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -66,7 +33,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
           </thead>
           <tbody className="divide-y divide-gray-100">
             {funcionarios.map((funcionario) => (
-              <tr key={funcionario.userId} className="hover:bg-gray-50 transition-colors">
+              <tr key={funcionario.id} className="hover:bg-gray-50 transition-colors">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">

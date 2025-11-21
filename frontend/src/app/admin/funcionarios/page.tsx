@@ -49,26 +49,6 @@ export default function FuncionariosPage() {
     setToken(localStorage.getItem('token') ?? "")
   }, []);
 
-  /**useEffect(() => {
-    const fetchData = async () => {
-      try{
-        setLoading(true)
-        const response = await fetch('http://localhost:8080/api/v1/products');
-        const data: Funcionario[] = await response.json()
-  
-        console.log(data)
-        setFuncionarios(data)
-      }catch(ex){
-        console.error(ex)
-        error("Ocurrio un error inesperado, contacta a un administrador.")
-      }finally{
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [])/** */
-
   const [funcionarios, setFuncionarios] = useState<FuncionarioDto[]>([
   ]);
 
@@ -85,7 +65,11 @@ export default function FuncionariosPage() {
       console.log(newFuncionario)
       
       try{
-        const resp = await api.post('/v1/administrator/create', newFuncionario);
+        const resp = await api.post('/v1/administrator/create', newFuncionario, {
+          headers: {
+            Authorization: "Bearer " + getToken()
+          }
+        });
         const created = resp.data;
   
         setFuncionarios([...funcionarios, created]);
@@ -96,47 +80,6 @@ export default function FuncionariosPage() {
         error("Ocurrio un error inesperado, contacta a un administrador.")
       }
     };
-
-  /**const handleCreateFuncionario = async (data: Funcionario) => {
-    const { id, ...newFuncionario} = data;
-
-    console.log(newFuncionario)
-
-    try{
-      const response = await fetch('http://localhost:8080/api/v1/products', {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(newFuncionario)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error en la creación del funcionario (${response.status})`);
-      } 
-
-      const created = await response.json();
-
-      setFuncionarios([...funcionarios, created]);
-      setIsModalOpen(false);
-      success(`Funcionario "${created.name}" creado exitosamente`);
-    }catch(ex){
-      console.error(ex)
-      error("Ocurrio un error inesperado, contacta a un administrador.")
-    }
-  }/** */
-
-  /**const handleEditFuncionario = async (data: Funcionario) => {
-    setFuncionarios(funcionarios.map(f => 
-      f.id === editingFuncionario?.id ? { ...f, ...data } : f
-    ));
-    setIsModalOpen(false);
-    setEditingFuncionario(undefined);
-    success(`Funcionario "${data.full_name}" actualizado exitosamente`);
-  };/**
-  
-  */
 
   const handleEditFuncionario = async (data: Funcionario) => {
     try {
@@ -154,18 +97,6 @@ export default function FuncionariosPage() {
       error("Ocurrió un error al actualizar el funcionario.");
     }
   };
-
-  /**const openDeleteConfirm = (funcionario: Funcionario) => {
-    setDeleteConfirm({ isOpen: true, funcionario });
-  };
-
-  const handleDeleteFuncionario = () => {
-    if (deleteConfirm.funcionario) {
-      setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
-      success(`Funcionario "${deleteConfirm.funcionario.full_name}" eliminado exitosamente`);
-      setDeleteConfirm({ isOpen: false });
-    }
-  };/** */
 
   const openDeleteConfirm = (funcionario: FuncionarioDto) => {
     setDeleteConfirm({ isOpen: true, funcionario });
@@ -198,6 +129,8 @@ export default function FuncionariosPage() {
 
   const filteredFuncionarios = funcionarios.filter(f =>
     f.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (f.phoneNumber != null && f.phoneNumber.includes(searchTerm.toLowerCase())) ||
+    f.document.toLowerCase().includes(searchTerm.toLowerCase()) ||
     f.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

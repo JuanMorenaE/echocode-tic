@@ -121,7 +121,9 @@ export default function ProductosPage() {
   const filteredProductos = productos.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ).sort((a, b) => {
+    return a.type.localeCompare(b.type)
+  });
 
   return (
     <div className="p-8">

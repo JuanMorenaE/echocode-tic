@@ -111,12 +111,21 @@ export default function IngredientesPage() {
     setIsModalOpen(true);
   };
 
-  const filteredIngredientes = ingredientes.filter(i => {
-    const matchesSearch = i.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          i.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTipo = filterTipo === 'ALL' || i.type === filterTipo;
-    return matchesSearch && matchesTipo;
-  });
+  const filteredIngredientes = ingredientes
+    .filter(i => {
+      const lowerSearch = searchTerm.toLowerCase();
+      const matchesSearch =
+        i.name.toLowerCase().includes(lowerSearch) ||
+        i.category.toLowerCase().includes(lowerSearch);
+      const matchesTipo = filterTipo === 'ALL' || i.type === filterTipo;
+      return matchesSearch && matchesTipo;
+    })
+    .sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type.localeCompare(b.type);
+      }
+      return a.category.localeCompare(b.category);
+    });
 
   useEffect(() => {
     console.log("ingredientes:", ingredientes);

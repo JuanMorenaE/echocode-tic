@@ -1,24 +1,19 @@
 package com.echocode.project.controllers;
 
 import com.echocode.project.dto.AdministratorRequest;
-import com.echocode.project.dto.AuthResponse;
 import com.echocode.project.dto.FuncionarioRequest;
-import com.echocode.project.dto.UpdateProfileRequest;
 import com.echocode.project.entities.Administrator;
-import com.echocode.project.entities.Client;
-import com.echocode.project.entities.User;
+import com.echocode.project.exceptions.ForbiddenException;
 import com.echocode.project.repositories.AdministratorRepository;
 import com.echocode.project.repositories.ClientRepository;
 import com.echocode.project.services.AdministratorService;
 import com.echocode.project.services.UserService;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.List;
 
@@ -42,10 +37,19 @@ public class AdministratorController {
     }
 
     @PostMapping("/create")
-    private ResponseEntity<Administrator> create(@AuthenticationPrincipal User user, FuncionarioRequest funcionarioRequest) {
-//        if (administratorRepository.getAdministratorByEmail((user.getEmail())).isEmpty())
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    private ResponseEntity<Administrator> create(@AuthenticationPrincipal UserDetails user, @RequestBody FuncionarioRequest funcionarioRequest)
+    {
+        checkAdmin(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(administratorService.create(funcionarioRequest));
+    }
+
+    public void checkAdmin(UserDetails userDetails) {
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ADMIN"));
+
+        if (!isAdmin) {
+            throw new ForbiddenException("You are not allowed to access this resource");
+        }
     }
 }

@@ -75,6 +75,7 @@ export const FuncionariosForm = ({ funcionario, onSubmit, onCancel }: Funcionari
         password: formData.password,
         document: formData.document,
         phoneNumber: formData.phoneNumber,
+        address: "",
       };
 
       await onSubmit(funcionarioData);

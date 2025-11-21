@@ -41,6 +41,11 @@ public class AuthService {
             throw new RuntimeException("Email already registered");
         }
 
+        // Verificar si el documento ya existe
+        if (clientRepository.existsByDocument(request.getCedula())) {
+            throw new RuntimeException("Document already registered");
+        }
+
         // Parsear birthdate si existe
         Date birthdate = null;
         if (request.getBirthdate() != null && !request.getBirthdate().isEmpty()) {

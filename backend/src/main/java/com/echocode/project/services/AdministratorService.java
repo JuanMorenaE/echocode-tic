@@ -37,6 +37,7 @@ public class AdministratorService {
 
             administratorRequests.add(
                     AdministratorRequest.builder()
+                            .id(administrator.getUserId())
                             .document(administrator.getDocument())
                             .firstName(administrator.getFirstName())
                             .lastName(administrator.getLastName())
@@ -51,6 +52,7 @@ public class AdministratorService {
     }
 
     public Administrator create(FuncionarioRequest funcionarioRequest){
+        System.out.println(funcionarioRequest.getDocument());
         Administrator administrator = Administrator.builder()
                 .document(funcionarioRequest.getDocument())
                 .firstName(funcionarioRequest.getFirstName())

@@ -58,7 +58,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             return User.builder()
                     .username(admin.getEmail())
                     .password(admin.getPasswordHash())
-                    .authorities(new ArrayList<>())
+                    .authorities("ADMIN")
                     .build();
         }
 
@@ -69,7 +69,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return User.builder()
                 .username(client.getEmail())
                 .password(client.getPasswordHash())
-                .authorities(new ArrayList<>())
+                .authorities("CLIENT")
                 .build();
     }
 }
