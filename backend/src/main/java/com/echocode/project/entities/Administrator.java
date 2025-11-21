@@ -11,9 +11,14 @@ import java.util.Date;
 @SuperBuilder
 @Getter @Setter
 @NoArgsConstructor
-@Table(name = "administrators")
+@DiscriminatorValue("ADMIN")
 public class Administrator extends User
 {
-    @Column(insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.setRole(Role.CLIENT);
+        this.createdAt = LocalDateTime.now();
+    }
 }
