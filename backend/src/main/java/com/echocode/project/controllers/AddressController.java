@@ -48,7 +48,7 @@ public class AddressController {
     }
 
     @PostMapping
-    public ResponseEntity<AddressResponse> createAddress(
+    public ResponseEntity<?> createAddress(
             @RequestBody AddressRequest request,
             Authentication authentication) {
         try {
@@ -56,7 +56,8 @@ public class AddressController {
             AddressResponse address = addressService.createAddress(userId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(address);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("error", e.getMessage()));
         }
     }
 

@@ -8,8 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class UserService {
@@ -47,10 +48,9 @@ public class UserService {
         }
         if (request.getBirthdate() != null && !request.getBirthdate().isEmpty()) {
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                Date birthdate = sdf.parse(request.getBirthdate());
+                LocalDate birthdate = LocalDate.parse(request.getBirthdate(), DateTimeFormatter.ISO_LOCAL_DATE);
                 client.setBirthdate(birthdate);
-            } catch (Exception e) {
+            } catch (DateTimeParseException e) {
                 throw new RuntimeException("Invalid birthdate format. Use yyyy-MM-dd");
             }
         }
@@ -60,8 +60,7 @@ public class UserService {
         // Formatear birthdate para la respuesta
         String birthdateStr = null;
         if (client.getBirthdate() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            birthdateStr = sdf.format(client.getBirthdate());
+            birthdateStr = client.getBirthdate().format(DateTimeFormatter.ISO_LOCAL_DATE);
         }
 
         return AuthResponse.builder()

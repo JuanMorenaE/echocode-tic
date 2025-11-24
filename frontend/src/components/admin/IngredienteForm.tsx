@@ -23,6 +23,18 @@ export const IngredienteForm = ({ ingrediente, onSubmit, onCancel }: Ingrediente
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Reset form when ingrediente prop changes (when opening modal for different ingredient)
+  useEffect(() => {
+    setFormData({
+      tipoProducto: ingrediente?.type || 'PIZZA',
+      nombre: ingrediente?.name || '',
+      categoria: ingrediente?.category || 'TAMAÑO',
+      precio: ingrediente?.price?.toString() || '',
+      cantidad: ingrediente?.quantity?.toString() || '1',
+    });
+    setErrors({});
+  }, [ingrediente]);
+
   const tipoProductoOptions = [
     { value: 'PIZZA', label: 'Pizza' },
     { value: 'BURGER', label: 'Hamburguesa' },
