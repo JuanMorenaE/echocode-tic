@@ -84,7 +84,7 @@ export default function FuncionariosPage() {
   const handleEditFuncionario = async (data: Funcionario) => {
     try {
       const { id, ...updateData } = data;
-      await api.put(`/v1/funcionarios/${id}`, updateData);
+      await api.put(`/v1/administrator/${id}`, updateData);
 
       // setFuncionarios(funcionarios.map(f =>
       //   f.id === id ? data : f

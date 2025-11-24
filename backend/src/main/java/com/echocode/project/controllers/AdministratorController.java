@@ -3,6 +3,7 @@ package com.echocode.project.controllers;
 import com.echocode.project.dto.AdministratorRequest;
 import com.echocode.project.dto.FuncionarioRequest;
 import com.echocode.project.entities.Administrator;
+import com.echocode.project.entities.Product;
 import com.echocode.project.exceptions.ForbiddenException;
 import com.echocode.project.repositories.AdministratorRepository;
 import com.echocode.project.repositories.ClientRepository;
@@ -42,6 +43,14 @@ public class AdministratorController {
         checkAdmin(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(administratorService.create(funcionarioRequest));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AdministratorRequest> update(@AuthenticationPrincipal UserDetails user, @RequestBody AdministratorRequest administrator) {
+        checkAdmin(user);
+
+        AdministratorRequest updatedAdministrator = administratorService.update(administrator);
+        return ResponseEntity.ok(updatedAdministrator);
     }
 
     public void checkAdmin(UserDetails userDetails) {

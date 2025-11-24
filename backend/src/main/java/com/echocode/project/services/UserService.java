@@ -62,8 +62,7 @@ public class UserService {
         // Formatear birthdate para la respuesta
         String birthdateStr = null;
         if (user instanceof Client client && client.getBirthdate() != null) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            birthdateStr = sdf.format(client.getBirthdate());
+            birthdateStr = client.getBirthdate().toString();
         }
 
         return AuthResponse.builder()
