@@ -18,7 +18,7 @@ public class Administrator extends User
 
     @PrePersist
     public void prePersist() {
-        this.setRole(Role.CLIENT);
+        this.setRole(Role.ADMIN);
         this.createdAt = LocalDateTime.now();
     }
 }

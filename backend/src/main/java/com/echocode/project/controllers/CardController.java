@@ -48,7 +48,7 @@ public class CardController {
     }
 
     @PostMapping
-    public ResponseEntity<CardResponse> createCard(
+    public ResponseEntity<?> createCard(
             @RequestBody CardRequest request,
             Authentication authentication) {
         try {
@@ -56,7 +56,8 @@ public class CardController {
             CardResponse card = cardService.createCard(userId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(card);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(java.util.Map.of("error", e.getMessage()));
         }
     }
 

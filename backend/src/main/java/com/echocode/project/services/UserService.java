@@ -10,10 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class UserService {
@@ -51,10 +50,9 @@ public class UserService {
         }
         if (user instanceof Client client && request.getBirthdate() != null && !request.getBirthdate().isEmpty()) {
             try {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-                LocalDate birthdate = LocalDate.parse(request.getBirthdate(), formatter);
+                LocalDate birthdate = LocalDate.parse(request.getBirthdate(), DateTimeFormatter.ISO_LOCAL_DATE);
                 client.setBirthdate(birthdate);
-            } catch (Exception e) {
+            } catch (DateTimeParseException e) {
                 throw new RuntimeException("Invalid birthdate format. Use yyyy-MM-dd");
             }
         }
