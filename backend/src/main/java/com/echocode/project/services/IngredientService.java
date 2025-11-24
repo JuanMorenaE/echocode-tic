@@ -1,6 +1,5 @@
 package com.echocode.project.services;
 
-import com.echocode.project.entities.Category;
 import com.echocode.project.entities.Ingredient;
 import com.echocode.project.entities.User;
 import com.echocode.project.enums.IngredientType;

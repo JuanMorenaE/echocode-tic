@@ -117,7 +117,6 @@ public class AuthService {
                 )
         );
 
-        // Intentar buscar como administrador primero
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

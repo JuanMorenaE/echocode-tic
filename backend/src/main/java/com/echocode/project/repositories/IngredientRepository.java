@@ -1,6 +1,5 @@
 package com.echocode.project.repositories;
 
-import com.echocode.project.entities.Category;
 import com.echocode.project.entities.Ingredient;
 import com.echocode.project.enums.IngredientType;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -10,6 +10,7 @@ const authApi = {
 			const res = await api.post<AuthResponse>('/v1/auth/login', payload);
 			return res.data;
 		} catch (error) {
+			console.log(error)
 			if (error instanceof AxiosError) {
 				const status = error.response?.status;
 				const message = error.response?.data?.message;
