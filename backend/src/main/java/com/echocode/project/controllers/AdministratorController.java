@@ -4,6 +4,7 @@ import com.echocode.project.dto.AdministratorRequest;
 import com.echocode.project.dto.FuncionarioRequest;
 import com.echocode.project.entities.Administrator;
 import com.echocode.project.entities.Product;
+import com.echocode.project.entities.User;
 import com.echocode.project.exceptions.ForbiddenException;
 import com.echocode.project.repositories.AdministratorRepository;
 import com.echocode.project.repositories.ClientRepository;
@@ -51,6 +52,14 @@ public class AdministratorController {
 
         AdministratorRequest updatedAdministrator = administratorService.update(administrator);
         return ResponseEntity.ok(updatedAdministrator);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetails user, @PathVariable Long id) {
+        checkAdmin(user);
+
+        administratorService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
     public void checkAdmin(UserDetails userDetails) {

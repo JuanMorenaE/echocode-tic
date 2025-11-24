@@ -1,12 +1,12 @@
 export interface Funcionario {
-  id: number;
+  userId: number;
   firstName: string;
   lastName: string;
   phoneNumber: string;
   email: string;
   password: string;
   document: string;
-  address: string;
+  address: object | null;
 }
 
 export interface FuncionarioDto {

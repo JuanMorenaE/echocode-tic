@@ -44,7 +44,7 @@ public class AdministratorService {
 
             administratorRequests.add(
                     AdministratorRequest.builder()
-                            .id(administrator.getUserId())
+                            .userId(administrator.getUserId())
                             .document(administrator.getDocument())
                             .firstName(administrator.getFirstName())
                             .lastName(administrator.getLastName())
@@ -73,7 +73,7 @@ public class AdministratorService {
     }
 
     public AdministratorRequest update(AdministratorRequest request) {
-        Administrator admin = administratorRepository.findById(request.getId())
+        Administrator admin = administratorRepository.findById(request.getUserId())
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Administrator not found."));
 
@@ -112,12 +112,20 @@ public class AdministratorService {
         Administrator saved = administratorRepository.save(admin);
 
         return AdministratorRequest.builder()
-                .id(saved.getUserId())
+                .userId(saved.getUserId())
                 .email(saved.getEmail())
                 .document(saved.getDocument())
                 .firstName(saved.getFirstName())
                 .lastName(saved.getLastName())
                 .phoneNumber(saved.getPhoneNumber())
                 .build();
+    }
+
+    public void delete(Long id) {
+        Administrator administrator = administratorRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found."));
+
+        // Hard delete
+        administratorRepository.delete(administrator);
     }
 }

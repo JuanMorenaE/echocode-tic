@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdministratorRequest {
-    private Long id;
+    private Long userId;
     private String document;
     private String firstName;
     private String lastName;

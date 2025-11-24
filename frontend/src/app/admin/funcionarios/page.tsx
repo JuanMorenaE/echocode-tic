@@ -24,7 +24,7 @@ export default function FuncionariosPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const resp = await api.get<FuncionarioDto[]>('/v1/administrator', {
+        const resp = await api.get<Funcionario[]>('/v1/administrator', {
           headers: {
             Authorization: "Bearer " + getToken(),
           }
@@ -49,20 +49,18 @@ export default function FuncionariosPage() {
     setToken(localStorage.getItem('token') ?? "")
   }, []);
 
-  const [funcionarios, setFuncionarios] = useState<FuncionarioDto[]>([
+  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([
   ]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingFuncionario, setEditingFuncionario] = useState<FuncionarioDto | undefined>();
+  const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; funcionario?: FuncionarioDto }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; funcionario?: Funcionario }>({
     isOpen: false,
   });
 
     const handleCreateFuncionario = async (data: Funcionario) => {
-      const { id, ...newFuncionario} = data;
-  
-      console.log(newFuncionario)
+      const { userId, ...newFuncionario} = data;
       
       try{
         const resp = await api.post('/v1/administrator/create', newFuncionario, {
@@ -71,6 +69,8 @@ export default function FuncionariosPage() {
           }
         });
         const created = resp.data;
+
+        console.log(created)
   
         setFuncionarios([...funcionarios, created]);
         setIsModalOpen(false);
@@ -83,12 +83,14 @@ export default function FuncionariosPage() {
 
   const handleEditFuncionario = async (data: Funcionario) => {
     try {
-      const { id, ...updateData } = data;
-      await api.put(`/v1/administrator/${id}`, updateData);
+      await api.put(`/v1/administrator/${data.userId}`, data);
 
       // setFuncionarios(funcionarios.map(f =>
       //   f.id === id ? data : f
       // ));
+      setFuncionarios((prev) =>
+        prev.map((i) => (i.userId === data.userId ? data : i))
+      );
       setIsModalOpen(false);
       setEditingFuncionario(undefined);
       success(`Funcionario "${data.firstName}" actualizado exitosamente`);
@@ -98,16 +100,16 @@ export default function FuncionariosPage() {
     }
   };
 
-  const openDeleteConfirm = (funcionario: FuncionarioDto) => {
+  const openDeleteConfirm = (funcionario: Funcionario) => {
     setDeleteConfirm({ isOpen: true, funcionario });
   };
 
   const handleDeleteFuncionario = async () => {
     if (deleteConfirm.funcionario) {
       try {
-        await api.delete(`/v1/funcionarios/${deleteConfirm.funcionario.id}`);
+        await api.delete(`/v1/administrator/${deleteConfirm.funcionario.userId}`);
 
-        setFuncionarios(funcionarios.filter(f => f.id !== deleteConfirm.funcionario!.id));
+        setFuncionarios(funcionarios.filter(f => f.userId !== deleteConfirm.funcionario!.userId));
         success(`Funcionario "${deleteConfirm.funcionario.firstName}" eliminado exitosamente`);
         setDeleteConfirm({ isOpen: false });
       } catch (ex) {
@@ -122,7 +124,7 @@ export default function FuncionariosPage() {
     setIsModalOpen(true);
   };
 
-  const openEditModal = (funcionario: FuncionarioDto) => {
+  const openEditModal = (funcionario: Funcionario) => {
     setEditingFuncionario(funcionario);
     setIsModalOpen(true);
   };

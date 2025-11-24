@@ -7,9 +7,9 @@ import { PencilSimpleIcon, TrashIcon } from '@/components/icons';
 import { UserIcon } from '@phosphor-icons/react';
 
 interface FuncionarioTableProps {
-  funcionarios: FuncionarioDto[];
-  onEdit: (funcionario: FuncionarioDto) => void;
-  onDelete: (funcionario: FuncionarioDto) => void; // ← Cambiar de "id: number" a "funcionario: Funcionario"
+  funcionarios: Funcionario[];
+  onEdit: (funcionario: Funcionario) => void;
+  onDelete: (funcionario: Funcionario) => void; // ← Cambiar de "id: number" a "funcionario: Funcionario"
 }
 
 export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: FuncionarioTableProps) => {
@@ -33,7 +33,7 @@ export const FuncionarioTable = ({ funcionarios, onEdit, onDelete }: Funcionario
           </thead>
           <tbody className="divide-y divide-gray-100">
             {funcionarios.map((funcionario) => (
-              <tr key={funcionario.id} className="hover:bg-gray-50 transition-colors">
+              <tr key={funcionario.userId} className="hover:bg-gray-50 transition-colors">
                 <td className="py-4 px-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-primary-100 to-primary-50 rounded-lg flex items-center justify-center">
