@@ -121,7 +121,7 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
         error={errors.precio}
       />
 
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Imagen del Producto
         </label>
@@ -153,7 +153,7 @@ export const ProductoForm = ({ producto, onSubmit, onCancel }: ProductoFormProps
             </p>
           </label>
         </div>
-      </div>
+      </div> */}
 
       {errors.submit && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
